@@ -20,6 +20,7 @@ setup_vim() {
 	echo "   > Setting up VIM"
 	mkdir .vim/backup .vim/swap .vim/undo
 	vim +PluginInstall +qall
+	stty sane
 }
 
 setup() {
@@ -96,6 +97,11 @@ post_linux() {
 	return
 }
 
+echo "   > Requesting sudo rights"
+sudo -v
+
+echo "   > Starting setup"
+
 case "$OSTYPE" in
 	darwin*)
 		echo "   > OS X detected"
@@ -123,3 +129,4 @@ case "$OSTYPE" in
 		;;
 esac
 
+echo "   > All done"
