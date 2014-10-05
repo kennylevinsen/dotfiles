@@ -96,20 +96,22 @@ post_linux() {
 	return
 }
 
-if [[ "$OSTYPE" == "darwin"* ]]
-then
-	echo "   > OS X detected"
-	pre_osx
-	setup
-	post_osx
-elif [[ "$OSTYPE" == "linux"* ]]
-then
-	echo "   > Linux detected"
-	pre_linux
-	setup
-	post_linux
-else
-	echo "Platform of type $OSTYPE not supported"
-	exit -1
-fi
+case "$OSTYPE" in
+	darwin*)
+		echo "   > OS X detected"
+		pre_osx
+		setup
+		post_osx
+		;;
+	linux*)
+		echo "   > Linux detected"
+		pre_linux
+		setup
+		post_linux
+		;;
+	*)
+		echo "Platform of type $OSTYPE not supported"
+		exit -1
+		;;
+esac
 
