@@ -7,7 +7,7 @@ cd ~
 
 GITPATH=https://github.com/Joushou/dotfiles.git
 
-function setup_git() {
+setup_git() {
 	echo "   > Setting up repo"
 	# Hacky "DIR IS NOT EMPTY!" workaround
 	git init
@@ -16,18 +16,18 @@ function setup_git() {
 	git submodule update --init
 }
 
-function setup_vim() {
+setup_vim() {
 	echo "   > Setting up VIM"
 	mkdir .vim/backup .vim/swap .vim/undo
 	vim +PluginInstall +qall
 }
 
-function setup() {
+setup() {
 	setup_git
 	setup_vim
 }
 
-function osx_conf() {
+osx_conf() {
 	echo "   > Configuring OS X"
 	sudo nvram SystemAudioVolume=" " # Be silent on boot
 	defaults write NSGlobalDomain NSWindowResizeTime -float 0.001 # Increase window resize speed
@@ -38,7 +38,7 @@ function osx_conf() {
 	defaults write com.apple.terminal StringEncodings -array 4 # Make Terminal UTF-8 only
 }
 
-function pre_osx() {
+pre_osx() {
 	osx_conf
 
 	echo "   > Setting up brew"
@@ -67,13 +67,13 @@ function pre_osx() {
 	brew cask install macvim
 }
 
-function post_osx() {
+post_osx() {
 	echo "   > Cleaning up"
 	git gc --aggressive
 	brew cleanup
 }
 
-function pre_linux() {
+pre_linux() {
 	echo "   > Installing packages"
 	if which apt-get > /dev/null
 	then
@@ -92,7 +92,7 @@ function pre_linux() {
 	fi
 }
 
-function post_linux() {
+post_linux() {
 	return
 }
 
