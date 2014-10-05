@@ -46,7 +46,7 @@ function pre_osx() {
 	brew upgrade
 	brew doctor
 
-	ecoh "   > Setting up cask"
+	echo "   > Setting up cask"
 
 	brew install caskroom/cask/brew-cask
 
