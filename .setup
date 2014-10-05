@@ -47,8 +47,10 @@ function pre_osx() {
 	brew upgrade
 	brew doctor
 
-	echo "   > Setting up cask"
+	echo "   > Setting up dupe tap"
+	brew tap homebrew/dupes
 
+	echo "   > Setting up cask"
 	brew install caskroom/cask/brew-cask
 
 	echo "   > Installing packages"
