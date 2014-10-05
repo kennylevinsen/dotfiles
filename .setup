@@ -1,0 +1,111 @@
+#!/bin/sh
+#
+# Detect platform
+#
+
+cd ~
+
+GITPATH=https://github.com/Joushou/dotfiles.git
+
+function setup_git() {
+	echo "   > Setting up repo"
+	# Hacky "DIR IS NOT EMPTY!" workaround
+	git init
+	git add remote origin $GITPATH
+	git pull --force origin master
+}
+
+function setup_vim() {
+	echo "   > Setting up VIM"
+	vim +PluginInstall +qall
+}
+
+function setup() {
+	setup_git
+	setup_vim
+}
+
+function osx_conf() {
+	echo "   > Configuring OS X"
+	sudo nvram SystemAudioVolume=" " # Be silent on boot
+	defaults write NSGlobalDomain NSWindowResizeTime -float 0.001 # Increase window resize speed
+	defaults write com.apple.dock expose-animation-duration -float 0.1 # Faster mission control
+	defaults write NSGlobalDomain KeyRepeat -int 0 # Fast key repeat
+	defaults write NSGlobalDomain AppleFontSmoothing -int 2 # Enable sub-pixel font rendering on non-Apple LCD's
+	defaults write com.apple.dock mineffect -string "scale"
+	defaults write com.apple.terminal StringEncodings -array 4 # Make Terminal UTF-8 only
+}
+
+function pre_osx() {
+	osx_conf
+
+	echo "   > Setting up brew"
+	which brew > /dev/null || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+	brew update
+	brew upgrade
+	brew doctor
+
+	ecoh "   > Setting up cask"
+
+	brew install caskroom/cask/brew-cask
+
+	echo "   > Installing packages"
+
+	# shell stuff
+	brew install tmux zsh coreutils findutils grep ascii
+
+	# code stuff
+	brew install autoconf automake ctags go git
+
+	# editor stuff
+	brew install vim
+	brew cask install macvim
+}
+
+function post_osx() {
+	echo "   > Cleaning up"
+	git gc --aggressive
+	brew cleanup
+}
+
+function pre_linux() {
+	echo "   > Installing packages"
+	if which apt-get > /dev/null
+	then
+		echo "   > Using APT"
+		# shell stuff
+		sudo apt-get install tmux zsh ascii
+
+		# code stuff
+		sudo apt-get install binutils autoconf automake ctags gdb clang golang git
+
+		# editor stuff
+		sudo brew install vim
+	else
+		echo "   ! Unknown Linux distribution"
+		exit 1
+	fi
+}
+
+function post_linux() {
+	return
+}
+
+if [[ "$OSTYPE" == "darwin"* ]]
+then
+	echo "   > OS X detected"
+	pre_osx
+	setup
+	post_osx
+elif [[ "$OSTYPE" == "linux"* ]]
+then
+	echo "   > Linux detected"
+	pre_linux
+	setup
+	post_linux
+else
+	echo "Platform of type $OSTYPE not supported"
+	exit -1
+fi
+
