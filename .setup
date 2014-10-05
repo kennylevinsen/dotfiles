@@ -18,6 +18,7 @@ function setup_git() {
 
 function setup_vim() {
 	echo "   > Setting up VIM"
+	mkdir .vim/backup .vim/swap .vim/undo
 	vim +PluginInstall +qall
 }
 
