@@ -11,7 +11,7 @@ function setup_git() {
 	echo "   > Setting up repo"
 	# Hacky "DIR IS NOT EMPTY!" workaround
 	git init
-	git add remote origin $GITPATH
+	git remote add origin $GITPATH
 	git pull --force origin master
 }
 
