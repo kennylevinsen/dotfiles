@@ -20,6 +20,7 @@ setup_vim() {
 	echo "   > Setting up VIM"
 	mkdir .vim/backup .vim/swap .vim/undo
 	vim +PluginInstall +qall
+	sleep 1
 	stty sane
 }
 
@@ -79,6 +80,9 @@ pre_linux() {
 	if which apt-get > /dev/null
 	then
 		echo "   > Using APT"
+		sudo apt-get update
+		sudo apt-get upgrade
+		
 		# shell stuff
 		sudo apt-get install tmux zsh ascii
 
@@ -94,7 +98,9 @@ pre_linux() {
 }
 
 post_linux() {
-	return
+	echo "   > Cleaning up"
+	git gc --aggressive
+	sudo apt-get clean
 }
 
 echo "   > Requesting sudo rights"
