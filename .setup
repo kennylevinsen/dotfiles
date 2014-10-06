@@ -1,16 +1,23 @@
-#!/bin/bash
+#!/bin/sh
 #
-# Detect platform
+# Dotfiles setup script from https://github.com/Joushou/dotfiles
+#
+# Use as you please, but give some credit, will ya'?
 #
 
-cd ~
-
+# This is manually set
 GITPATH=https://github.com/Joushou/dotfiles.git
 
-RED_START=""
-GREEN_START=""
-COLOR_END=""
+# Toggles for command-line options
+UPGRADE=0
+UPDATE=0
+VERIFY=0
+DRYRUN=1
+CASK=0
+OSXCONF=0
+VERBOSE=1
 
+# Color stuff
 case $TERM in
 	xterm*)
 		RED_START="\033[1;31m"
@@ -26,25 +33,59 @@ case $TERM in
 		;;
 esac
 
+###################################
+#
+# Utility functions
+#
+
+# This is stupid, but it works
+is_set() {
+	return $1
+}
+
+# Log error and exit
 error() {
 	printf '%b' "$RED_START! $1$COLOR_END\n"
 	exit 1
 }
 
+# Log
 log() {
 	printf '%b' "$WHITE_START> $1$COLOR_END\n"
 }
 
+# Run, log and handle error
 run() {
 	printf '%b' "$WHITE_START>    $1$COLOR_END\n"
-	if ${@#$1}
+	cmd=${@#$1}
+	success=1
+
+	printf '%b' "[$1: $cmd]\n" >> .setup_log
+
+	# TODO Fix logging in verbose mode
+
+	if is_set $VERBOSE
 	then
-		return 0
+		is_set $DRYRUN || $cmd && success=0
 	else
-		error "FAILED"
+		is_set $DRYRUN || $cmd >> .setup_log 2>&1 && success=0
+	fi
+
+	printf '%b' "\n" >> .setup_log
+
+	if [ "$success" = "1" ]
+	then
+		echo $output
+		error "FAILED, check .setup_log for details"
 	fi
 }
 
+###################################
+#
+# Generic Setup
+#
+
+# Setup the dotfile git repo
 setup_git() {
 	log "Setting up repo"
 	# Hacky "DIR IS NOT EMPTY!" workaround
@@ -54,6 +95,7 @@ setup_git() {
 	run "Init submodules" git submodule update --init
 }
 
+# Prepare vim
 setup_vim() {
 	log "Setting up VIM"
 	run "Make extra .vim subdirectories" mkdir .vim/backup .vim/swap .vim/undo
@@ -62,35 +104,43 @@ setup_vim() {
 	run "Make tty sane" stty sane
 }
 
+# Setup dispatcher
 setup() {
 	setup_git
 	setup_vim
 }
 
+###################################
+#
+# OS X specific stuff
+#
+
+# Set defaults
 osx_conf() {
 	log "Configuring OS X"
 	run "Be silent on boot" sudo nvram SystemAudioVolume=" "
-	run "Increase window resize speed" defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
-	run "Faster mission control" defaults write com.apple.dock expose-animation-duration -float 0.1
-	run "Fast key repeat" defaults write NSGlobalDomain KeyRepeat -int 0
+	run "Increasing window resize speed" defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
+	run "Increasing mission control animation speed" defaults write com.apple.dock expose-animation-duration -float 0.1
+	run "Setting fast key repeat" defaults write NSGlobalDomain KeyRepeat -int 0
 	run "Always use sub-pixel font rendering" defaults write NSGlobalDomain AppleFontSmoothing -int 2
-	run "Dock scaling effect" defaults write com.apple.dock mineffect -string "scale"
-	run "Terminal UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
+	run "Setting Dock scaling effect" defaults write com.apple.dock mineffect -string "scale"
+	run "Setting Terminal.app UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
 }
 
+# Setup brew and install packages
 pre_osx() {
-	osx_conf
+	is_set $OSXCONF && osx_conf
 
 	log "Installing packages"
 	which brew > /dev/null || run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-	run "Update brew" brew update
-	run "Upgrade brew" brew upgrade
-	run "Check brew" brew doctor
+	is_set $UPDATE && run "Updating brew" brew update
+	is_set $UPGRADE && run "Upgrading brew" brew upgrade
+	is_set $VERIFY && run "Verifying brew" brew doctor
 
-	run "Install dupe tap" brew tap homebrew/dupes
+	run "Installing dupe tap" brew tap homebrew/dupes
 
-	run "Setup cask" brew install caskroom/cask/brew-cask
+	is_set $CASK && run "Setting up cask" brew install caskroom/cask/brew-cask
 
 	# shell stuff
 	run "Shell stuff" brew install tmux zsh coreutils findutils grep ascii
@@ -100,45 +150,91 @@ pre_osx() {
 
 	# editor stuff
 	run "VIM" brew install vim
-	run "MacVIM" brew cask install macvim
+	is_set $CASK && run "MacVIM" brew cask install macvim
 }
 
+# Cleanup after brew and git
 post_osx() {
 	log "Cleaning up"
 	run "Git" git gc --aggressive
 	run "Brew" brew cleanup
 }
 
+###################################
+#
+# Linux
+#
+
+# TODO: Add pacman, yum support.
+
+# Install packages
 pre_linux() {
 	log "Installing packages"
 	if which apt-get > /dev/null
 	then
 		log "Using APT"
-		run "Update APT" sudo apt-get update
-		run "Upgrade packages" sudo apt-get upgrade
+		is_set $UPDATE && run "Updating APT" sudo apt-get -y update
+		is_set $UPGRADE && run "Upgrading packages" sudo apt-get -y upgrade
 		
 		# shell stuff
-		run "Shell stuff" sudo apt-get install tmux zsh ascii
+		run "Shell stuff" sudo apt-get -y install tmux zsh ascii
 
 		# code stuff
-		run "Code stuff" sudo apt-get install binutils autoconf automake ctags gdb clang golang git mercurial
+		run "Code stuff" sudo apt-get -y install binutils autoconf automake ctags gdb clang golang git mercurial
 
 		# editor stuff
-		run "VIM" sudo apt-get install vim
+		run "VIM" sudo apt-get -y install vim
 	else
 		error "Package manager unknown"
 	fi
 }
 
+# Cleanup apt and git
 post_linux() {
 	log "Cleaning up"
 	run "Git" git gc --aggressive
-	run "APT" sudo apt-get clean
+	which apt-get > /dev/null && run "APT" sudo apt-get clean
 }
+
+#
+# Main
+#
+
+# TODO: Add force OS option
+
+cd ~
+
+for i in $@
+do
+	if [ "$i" = "--no-upgrade" ]
+	then
+		UPGRADE=1
+	elif [ "$i" = "--no-update" ]
+	then
+		UPDATE=1
+	elif [ "$i" = "--no-verify" ]
+	then
+		VERIFY=1
+	elif [ "$i" = "--dry-run" ]
+	then
+		DRYRUN=0
+	elif [ "$i" = "--no-cask" ]
+	then
+		CASK=1
+	elif [ "$i" = "--no-osx-conf" ]
+	then
+		OSXCONF=1
+	elif [ "$i" = "--verbose" ]
+	then
+		VERBOSE=0
+	fi
+done
 
 log "Starting setup"
 
 run "Requesting sudo rights" sudo -v
+
+# TODO: Add FreeBSD support.
 
 case "$OSTYPE" in
 	darwin*)
@@ -168,3 +264,4 @@ case "$OSTYPE" in
 esac
 
 log "All done"
+
