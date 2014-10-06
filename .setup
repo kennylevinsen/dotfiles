@@ -96,7 +96,7 @@ pre_osx() {
 	run "Shell stuff" brew install tmux zsh coreutils findutils grep ascii
 
 	# code stuff
-	run "Code stuff" brew install autoconf automake ctags go git
+	run "Code stuff" brew install autoconf automake ctags go git mercurial
 
 	# editor stuff
 	run "VIM" brew install vim
@@ -121,7 +121,7 @@ pre_linux() {
 		run "Shell stuff" sudo apt-get install tmux zsh ascii
 
 		# code stuff
-		run "Code stuff" sudo apt-get install binutils autoconf automake ctags gdb clang golang git
+		run "Code stuff" sudo apt-get install binutils autoconf automake ctags gdb clang golang git mercurial
 
 		# editor stuff
 		run "VIM" sudo apt-get install vim
