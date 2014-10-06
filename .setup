@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Detect platform
 #
@@ -7,20 +7,58 @@ cd ~
 
 GITPATH=https://github.com/Joushou/dotfiles.git
 
+RED_START=""
+GREEN_START=""
+COLOR_END=""
+
+case $TERM in
+	xterm*)
+		RED_START="\033[1;31m"
+		GREEN_START="\033[1;32m"
+		WHITE_START="\033[1;37m"
+		COLOR_END="\033[0m"
+		;;
+	screen*)
+		RED_START="\033[1;31m"
+		GREEN_START="\033[1;32m"
+		WHITE_START="\033[1;37m"
+		COLOR_END="\033[0m"
+		;;
+esac
+
+error() {
+	printf '%b' "$RED_START! $1$COLOR_END\n"
+	exit 1
+}
+
+log() {
+	printf '%b' "$WHITE_START> $1$COLOR_END\n"
+}
+
+run() {
+	printf '%b' "$WHITE_START>    $1$COLOR_END\n"
+	if ${@#$1}
+	then
+		return 0
+	else
+		error "FAILED"
+	fi
+}
+
 setup_git() {
-	echo "   > Setting up repo"
+	log "Setting up repo"
 	# Hacky "DIR IS NOT EMPTY!" workaround
-	git init
-	git remote add origin $GITPATH
-	git pull --force origin master
-	git submodule update --init
+	run "Init git" git init
+	run "Add remote" git remote add origin $GITPATH
+	run "Pull master" git pull --force origin master
+	run "Init submodules" git submodule update --init
 }
 
 setup_vim() {
-	echo "   > Setting up VIM"
-	mkdir .vim/backup .vim/swap .vim/undo
-	vim +PluginInstall +qall
-	stty sane
+	log "Setting up VIM"
+	run "Make extra .vim subdirectories" mkdir .vim/backup .vim/swap .vim/undo
+	run "Install plugins" vim +PluginInstall +qall
+	run "Make tty sane" stty sane
 }
 
 setup() {
@@ -29,88 +67,83 @@ setup() {
 }
 
 osx_conf() {
-	echo "   > Configuring OS X"
-	sudo nvram SystemAudioVolume=" " # Be silent on boot
-	defaults write NSGlobalDomain NSWindowResizeTime -float 0.001 # Increase window resize speed
-	defaults write com.apple.dock expose-animation-duration -float 0.1 # Faster mission control
-	defaults write NSGlobalDomain KeyRepeat -int 0 # Fast key repeat
-	defaults write NSGlobalDomain AppleFontSmoothing -int 2 # Enable sub-pixel font rendering on non-Apple LCD's
-	defaults write com.apple.dock mineffect -string "scale"
-	defaults write com.apple.terminal StringEncodings -array 4 # Make Terminal UTF-8 only
+	log "Configuring OS X"
+	run "Be silent on boot" sudo nvram SystemAudioVolume=" "
+	run "Increase window resize speed" defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
+	run "Faster mission control" defaults write com.apple.dock expose-animation-duration -float 0.1
+	run "Fast key repeat" defaults write NSGlobalDomain KeyRepeat -int 0
+	run "Always use sub-pixel font rendering" defaults write NSGlobalDomain AppleFontSmoothing -int 2
+	run "Dock scaling effect" defaults write com.apple.dock mineffect -string "scale"
+	run "Terminal UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
 }
 
 pre_osx() {
 	osx_conf
 
-	echo "   > Setting up brew"
-	which brew > /dev/null || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	log "Installing packages"
+	which brew > /dev/null || run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-	brew update
-	brew upgrade
-	brew doctor
+	run "Update brew" brew update
+	run "Upgrade brew" brew upgrade
+	run "Check brew" brew doctor
 
-	echo "   > Setting up dupe tap"
-	brew tap homebrew/dupes
+	run "Install dupe tap" brew tap homebrew/dupes
 
-	echo "   > Setting up cask"
-	brew install caskroom/cask/brew-cask
-
-	echo "   > Installing packages"
+	run "Setup cask" brew install caskroom/cask/brew-cask
 
 	# shell stuff
-	brew install tmux zsh coreutils findutils grep ascii
+	run "Shell stuff" brew install tmux zsh coreutils findutils grep ascii
 
 	# code stuff
-	brew install autoconf automake ctags go git
+	run "Code stuff" brew install autoconf automake ctags go git
 
 	# editor stuff
-	brew install vim
-	brew cask install macvim
+	run "VIM" brew install vim
+	run "MacVIM" brew cask install macvim
 }
 
 post_osx() {
-	echo "   > Cleaning up"
-	git gc --aggressive
-	brew cleanup
+	log "Cleaning up"
+	run "Git" git gc --aggressive
+	run "Brew" brew cleanup
 }
 
 pre_linux() {
-	echo "   > Installing packages"
+	log "Installing packages"
 	if which apt-get > /dev/null
 	then
-		echo "   > Using APT"
+		log "Using APT"
 		# shell stuff
-		sudo apt-get install tmux zsh ascii
+		run "Shell stuff" sudo apt-get install tmux zsh ascii
 
 		# code stuff
-		sudo apt-get install binutils autoconf automake ctags gdb clang golang git
+		run "Code stuff" sudo apt-get install binutils autoconf automake ctags gdb clang golang git
 
 		# editor stuff
-		sudo brew install vim
+		run "VIM" sudo apt-get install vim
 	else
-		echo "   ! Unknown Linux distribution"
-		exit 1
+		error "Package manager unknown"
 	fi
 }
 
 post_linux() {
-	return
+	log "Cleaning up"
+	run "Git" git gc --aggressive
 }
 
-echo "   > Requesting sudo rights"
-sudo -v
+log "Starting setup"
 
-echo "   > Starting setup"
+run "Requesting sudo rights" sudo -v
 
 case "$OSTYPE" in
 	darwin*)
-		echo "   > OS X detected"
+		log "OS X detected"
 		pre_osx
 		setup
 		post_osx
 		;;
 	linux*)
-		echo "   > Linux detected"
+		log "Linux detected"
 		pre_linux
 		setup
 		post_linux
@@ -123,10 +156,10 @@ case "$OSTYPE" in
 			setup
 			post_linux
 		else
-			echo "Platform of type $OSTYPE not supported"
-			exit 1
+			
+			error "Platform of type $OSTYPE not supported"
 		fi
 		;;
 esac
 
-echo "   > All done"
+log "All done"
