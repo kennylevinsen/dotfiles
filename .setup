@@ -58,6 +58,7 @@ setup_vim() {
 	log "Setting up VIM"
 	run "Make extra .vim subdirectories" mkdir .vim/backup .vim/swap .vim/undo
 	run "Install plugins" vim +PluginInstall +qall
+	run "Wait for sanity" sleep 1
 	run "Make tty sane" stty sane
 }
 
@@ -113,6 +114,9 @@ pre_linux() {
 	if which apt-get > /dev/null
 	then
 		log "Using APT"
+		run "Update APT" sudo apt-get update
+		run "Upgrade packages" sudo apt-get upgrade
+		
 		# shell stuff
 		run "Shell stuff" sudo apt-get install tmux zsh ascii
 
@@ -129,6 +133,7 @@ pre_linux() {
 post_linux() {
 	log "Cleaning up"
 	run "Git" git gc --aggressive
+	run "APT" sudo apt-get clean
 }
 
 log "Starting setup"
