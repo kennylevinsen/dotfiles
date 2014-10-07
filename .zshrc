@@ -30,5 +30,5 @@ robbyrussell/oh-my-zsh plugins/mosh
 
 
 EOB
-antigen theme kardan
+antigen theme Joushou/zsh kardan
 antigen apply

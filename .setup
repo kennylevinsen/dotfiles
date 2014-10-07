@@ -258,7 +258,7 @@ for i in $@
 do
 	case $i in
 		--no-upgrade)
-			OPT_OPGRADE=1
+			OPT_UPGRADE=1
 			;;
 		--no-update)
 			OPT_UPDATE=1
