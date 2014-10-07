@@ -1,4 +1,4 @@
-source ./antigen/antigen.zsh
+source .antigen/antigen.zsh
 
 antigen use oh-my-zsh
 antigen bundles <<EOB
