@@ -106,10 +106,11 @@ run() {
 setup_git() {
 	log "Setting up dotfiles repo"
 	# Hacky "DIR IS NOT EMPTY!" workaround
-	run "Init git" git init
-	run "Add remote" git remote add origin $GITPATH
-	run "Pull master" git pull --force origin master
-	run "Init submodules" git submodule update --init
+	run "Initialising git" git init
+	run "Adding remote" git remote add origin $GITPATH
+	run "Pulling master" git pull --force origin master
+	run "Initialising submodules" git submodule update --init
+	run "Setting upstream" git branch --set-upstream-to=origin/master master
 }
 
 # Prepare vim
@@ -152,12 +153,27 @@ osx_conf() {
 	run "Setting Terminal.app UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
 }
 
+# Install brew
+brew_install() {
+	run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	run "Making paths file" sudo tee /etc/paths <<EOS
+/usr/local/bin
+/usr/local/opt/coreutils/libexec/gnubin
+/usr/bin
+/bin
+/usr/local/sbin
+/usr/sbin
+/sbin
+EOS
+	eval $(/usr/libexec/path_helper -s)
+}
+
 # Setup brew and install packages
 pre_osx() {
 	is_set $OPT_CONF &&			osx_conf
 
 										log "Installing packages"
-	in_path brew ||				run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	in_path brew ||				brew_install
 
 	is_set $OPT_UPDATE &&		run "Updating brew" brew update
 	is_set $OPT_UPGRADE &&		run "Upgrading brew" brew upgrade
@@ -196,10 +212,9 @@ post_osx() {
 
 # Install packages
 pre_linux() {
-	log "Installing packages"
 	if in_path apt-get
 	then
-		log "Using APT"
+		log "Installing packages with APT"
 		is_set $OPT_UPDATE &&		run "Updating APT" sudo apt-get -y update
 		is_set $OPT_UPGRADE &&		run "Upgrading packages" sudo apt-get -y upgrade
 		
