@@ -4,6 +4,7 @@
 #
 # Use as you please, but give some credit, will ya'?
 #
+# TODO Use symlinks to .dotfiles dir
 
 GITPATH=https://github.com/Joushou/dotfiles.git
 
