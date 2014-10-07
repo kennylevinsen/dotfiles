@@ -5,17 +5,19 @@
 # Use as you please, but give some credit, will ya'?
 #
 
-# This is manually set
 GITPATH=https://github.com/Joushou/dotfiles.git
 
 # Toggles for command-line options
-UPGRADE=0
-UPDATE=0
-VERIFY=0
-DRYRUN=1
-CASK=0
-OSXCONF=0
-VERBOSE=1
+OPT_UPGRADE=0
+OPT_UPDATE=0
+OPT_VERIFY=0
+OPT_DRYRUN=1
+OPT_CASK=0
+OPT_CONF=0
+OPT_TOOLCHAIN=0
+OPT_SHELL=0
+OPT_DUPES=0
+OPT_VERBOSE=1
 
 # Color stuff
 case $TERM in
@@ -33,30 +35,41 @@ case $TERM in
 		;;
 esac
 
-###################################
-#
-# Utility functions
-#
+###############################################################################
+#                                                                             #
+# Utility functions                                                           #
+#                                                                             #
+###############################################################################
 
 # This is stupid, but it works
 is_set() {
 	return $1
 }
 
+# Checks if the tool is available
+in_path() {
+	ret=which $1 1>/dev/null 2>/dev/null
+	printf '%b' "[tool availability check for $1: $ret]\n" >> .setup_log
+	return $ret
+}
+
 # Log error and exit
 error() {
 	printf '%b' "$RED_START! $1$COLOR_END\n"
+	printf '%b' "! $1\n" >> .setup_log
 	exit 1
 }
 
 # Log
 log() {
 	printf '%b' "$WHITE_START> $1$COLOR_END\n"
+	printf '%b' "> $1\n" >> .setup_log
 }
 
 # Run, log and handle error
 run() {
 	printf '%b' "$WHITE_START>    $1$COLOR_END\n"
+	printf '%b' ">    $1\n" >> .setup_log
 	cmd=${@#$1}
 	success=1
 
@@ -64,11 +77,11 @@ run() {
 
 	# TODO Fix logging in verbose mode
 
-	if is_set $VERBOSE
+	if is_set $OPT_VERBOSE
 	then
-		is_set $DRYRUN || $cmd && success=0
+		is_set $OPT_DRYRUN || $cmd && success=0
 	else
-		is_set $DRYRUN || $cmd >> .setup_log 2>&1 && success=0
+		is_set $OPT_DRYRUN || $cmd >> .setup_log 2>&1 && success=0
 	fi
 
 	printf '%b' "\n" >> .setup_log
@@ -80,14 +93,16 @@ run() {
 	fi
 }
 
-###################################
-#
-# Generic Setup
-#
+###############################################################################
+#                                                                             #
+# Generic Setup                                                               #
+#                                                                             #
+# TODO setup antigen for zsh                                                  #
+###############################################################################
 
 # Setup the dotfile git repo
 setup_git() {
-	log "Setting up repo"
+	log "Setting up dotfiles repo"
 	# Hacky "DIR IS NOT EMPTY!" workaround
 	run "Init git" git init
 	run "Add remote" git remote add origin $GITPATH
@@ -100,20 +115,28 @@ setup_vim() {
 	log "Setting up VIM"
 	run "Make extra .vim subdirectories" mkdir .vim/backup .vim/swap .vim/undo
 	run "Install plugins" vim +PluginInstall +qall
-	run "Wait for sanity" sleep 1
+	sleep 0.5
 	run "Make tty sane" stty sane
+}
+
+# Prepare antigen
+setup_antigen() {
+	log "Setting up antigen"
+	run "Clone repo" git clone https://github.com/zsh-users/antigen.git .antigen
 }
 
 # Setup dispatcher
 setup() {
 	setup_git
 	setup_vim
+	is_set $OPT_SHELL && setup_antigen
 }
 
-###################################
-#
-# OS X specific stuff
-#
+###############################################################################
+#                                                                             #
+# OS X specific stuff                                                         #
+#                                                                             #
+###############################################################################
 
 # Set defaults
 osx_conf() {
@@ -129,28 +152,30 @@ osx_conf() {
 
 # Setup brew and install packages
 pre_osx() {
-	is_set $OSXCONF && osx_conf
+	is_set $OPT_CONF &&			osx_conf
 
-	log "Installing packages"
-	which brew > /dev/null || run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+										log "Installing packages"
+	in_path brew ||				run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-	is_set $UPDATE && run "Updating brew" brew update
-	is_set $UPGRADE && run "Upgrading brew" brew upgrade
-	is_set $VERIFY && run "Verifying brew" brew doctor
+	is_set $OPT_UPDATE &&		run "Updating brew" brew update
+	is_set $OPT_UPGRADE &&		run "Upgrading brew" brew upgrade
+	is_set $OPT_VERIFY &&		run "Verifying brew" brew doctor
 
-	run "Installing dupe tap" brew tap homebrew/dupes
+	is_set $OPT_DUPES &&			run "Installing dupe tap" brew tap homebrew/dupes
 
-	is_set $CASK && run "Setting up cask" brew install caskroom/cask/brew-cask
+	is_set $OPT_CASK &&			run "Setting up cask" brew install caskroom/cask/brew-cask
+	
+										# TODO zsh is technically a dupe, as zsh is bundled in old version
+	is_set $OPT_SHELL &&			run "Shell" brew install tmux zsh
+	is_set $OPT_DUPES &&			run "Newer shell utils" brew install coreutils findutils grep
+										run "Shell utils" brew install ascii
+										run "Version control" brew install git mercurial
+										run "Code assist" brew install ctags
+	is_set $OPT_TOOLCHAIN &&	run "Toolchain" brew install autoconf automake go
 
-	# shell stuff
-	run "Shell stuff" brew install tmux zsh coreutils findutils grep ascii
-
-	# code stuff
-	run "Code stuff" brew install autoconf automake ctags go git mercurial
-
-	# editor stuff
-	run "VIM" brew install vim
-	is_set $CASK && run "MacVIM" brew cask install macvim
+										# editor stuff
+	is_set $OPT_DUPES &&			run "VIM" brew install vim
+	is_set $OPT_CASK &&			run "MacVIM" brew cask install macvim
 }
 
 # Cleanup after brew and git
@@ -160,30 +185,30 @@ post_osx() {
 	run "Brew" brew cleanup
 }
 
-###################################
-#
-# Linux
-#
-
-# TODO: Add pacman, yum support.
+###############################################################################
+#                                                                             #
+# Linux                                                                       #
+#                                                                             #
+# TODO: Add pacman, yum support.                                              #
+###############################################################################
 
 # Install packages
 pre_linux() {
 	log "Installing packages"
-	if which apt-get > /dev/null
+	if in_path apt-get
 	then
 		log "Using APT"
-		is_set $UPDATE && run "Updating APT" sudo apt-get -y update
-		is_set $UPGRADE && run "Upgrading packages" sudo apt-get -y upgrade
+		is_set $OPT_UPDATE &&		run "Updating APT" sudo apt-get -y update
+		is_set $OPT_UPGRADE &&		run "Upgrading packages" sudo apt-get -y upgrade
 		
-		# shell stuff
-		run "Shell stuff" sudo apt-get -y install tmux zsh ascii
+		is_set $OPT_SHELL &&			run "Shell" sudo apt-get -y install tmux zsh
+											run "Shell utils" sudo apt-get -y install ascii
+											run "Version control" sudo apt-get -y install git mercurial
+											run "Code assist" sudo apt-get -y install ctags
+		is_set $OPT_TOOLCHAIN &&	run "Toolchain" sudo apt-get -y install binutils autoconf automake gdb clang golang
 
-		# code stuff
-		run "Code stuff" sudo apt-get -y install binutils autoconf automake ctags gdb clang golang git mercurial
-
-		# editor stuff
-		run "VIM" sudo apt-get -y install vim
+											# editor stuff
+											run "VIM" sudo apt-get -y install vim
 	else
 		error "Package manager unknown"
 	fi
@@ -191,50 +216,72 @@ pre_linux() {
 
 # Cleanup apt and git
 post_linux() {
-	log "Cleaning up"
-	run "Git" git gc --aggressive
-	which apt-get > /dev/null && run "APT" sudo apt-get clean
+								log "Cleaning up"
+								run "Git" git gc --aggressive
+	in_path apt-get &&	run "APT" sudo apt-get clean
 }
 
-#
-# Main
-#
+###############################################################################
+#                                                                             #
+# Main                                                                        #
+#                                                                             #
+###############################################################################
 
-# TODO: Add force OS option
 
 cd ~
 
+#
+# Handle parameters
+#
+# TODO: Add force OS option
+
 for i in $@
 do
-	if [ "$i" = "--no-upgrade" ]
-	then
-		UPGRADE=1
-	elif [ "$i" = "--no-update" ]
-	then
-		UPDATE=1
-	elif [ "$i" = "--no-verify" ]
-	then
-		VERIFY=1
-	elif [ "$i" = "--dry-run" ]
-	then
-		DRYRUN=0
-	elif [ "$i" = "--no-cask" ]
-	then
-		CASK=1
-	elif [ "$i" = "--no-osx-conf" ]
-	then
-		OSXCONF=1
-	elif [ "$i" = "--verbose" ]
-	then
-		VERBOSE=0
-	fi
+	case $i in
+		--no-upgrade)
+			OPT_OPGRADE=1
+			;;
+		--no-update)
+			OPT_UPDATE=1
+			;;
+		--no-verify)
+			OPT_VERIFY=1
+			;;
+		--no-cask)
+			OPT_CASK=1
+			;;
+		--no-conf)
+			OPT_CONF=1
+			;;
+		--no-toolchain)
+			OPT_TOOLCHAIN=1
+			;;
+		--no-shell)
+			OPT_SHELL=1
+			;;
+		--no-dupes)
+			OPT_DUPES=1
+			;;
+		--dry-run)
+			OPT_DRYRUN=0
+			;;
+		--verbose)
+			OPT_VERBOSE=0
+			;;
+		*)
+			error "Unknown parameter: $i"
+			;;
+	esac
 done
 
 log "Starting setup"
 
 run "Requesting sudo rights" sudo -v
 
-# TODO: Add FreeBSD support.
+#
+# OS detect
+#
+# TODO BSD?
 
 case "$OSTYPE" in
 	darwin*)
