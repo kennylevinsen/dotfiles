@@ -99,7 +99,6 @@ run() {
 #                                                                             #
 # Generic Setup                                                               #
 #                                                                             #
-# TODO setup antigen for zsh                                                  #
 ###############################################################################
 
 # Setup the dotfile git repo
@@ -141,6 +140,7 @@ setup() {
 #                                                                             #
 # OS X specific stuff                                                         #
 #                                                                             #
+# TODO setup powerline fonts                                                  #
 ###############################################################################
 
 # Set defaults
