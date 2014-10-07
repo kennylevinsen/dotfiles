@@ -123,16 +123,18 @@ setup_vim() {
 }
 
 # Prepare antigen
-setup_antigen() {
-	log "Setting up antigen"
-	run "Clone repo" git clone https://github.com/zsh-users/antigen.git .antigen
+setup_zsh() {
+	log "Setting up zsh"
+	run "Cloning antigen" git clone https://github.com/zsh-users/antigen.git .antigen
+	run "Initialising zsh" zsh .zshrc
+	run "Changing user shell" sudo chsh -s $(which zsh) $USER
 }
 
 # Setup dispatcher
 setup() {
 	setup_git
 	setup_vim
-	is_set $OPT_SHELL && setup_antigen
+	is_set $OPT_SHELL && setup_zsh
 }
 
 ###############################################################################
