@@ -144,7 +144,7 @@ setup_zsh() {
 
 # Setup dispatcher
 setup() {
-	is_set $GIT_CLONE && setup_git
+	is_set $OPT_GITCLONE && setup_git
 	setup_symlinks
 	setup_vim
 	is_set $OPT_SHELL && setup_zsh
