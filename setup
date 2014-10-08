@@ -129,7 +129,7 @@ setup_symlinks() {
 # Prepare vim
 setup_vim() {
     log "Setting up VIM"
-    run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap ~/.vim/undo
+    run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap
     run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
     sleep 0.5
     run "Ensure xon isn't set" eval "stty -ixon || true"
@@ -199,7 +199,7 @@ pre_osx() {
     is_set $OPT_DUPES &&     run "Installing dupe tap" brew tap homebrew/dupes
 
     is_set $OPT_CASK &&      run "Setting up cask" brew install caskroom/cask/brew-cask
-    
+
                              # TODO zsh is technically a dupe, as zsh is bundled in old version
     is_set $OPT_SHELL &&     run "Shell" brew install tmux zsh
     is_set $OPT_DUPES &&     run "Newer shell utils" brew install coreutils findutils grep
@@ -339,7 +339,7 @@ case "$OSTYPE" in
             setup
             post_linux
         else
-            
+
             error "Platform of type $OSTYPE not supported"
         fi
         ;;

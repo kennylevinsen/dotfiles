@@ -71,7 +71,6 @@ set fillchars+=vert:│          " Make the vertical split continuous
 " Vim stuff
 set backupdir=~/.vim/backup    " Backup store
 set directory=~/.vim/swap      " Swap store
-set undodir=~/.vim/undo        " Undo store
 set backspace=indent,eol,start " Change backspace behaviour to be more sensible
 set whichwrap+=<,>,[,]         " Allow left/right cursor at SOL/EOL to do as expected
 set shortmess=atI              " Slighty change dialogues, suppress intro
