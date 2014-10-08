@@ -132,8 +132,8 @@ setup_vim() {
 	run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap ~/.vim/undo
 	run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
 	sleep 0.5
-	run "Ensure xon isn't set" stty -ixon
-	run "Make tty sane" stty sane
+	run "Ensure xon isn't set" eval "stty -ixon || true"
+	run "Make tty sane" eval "stty sane || true"
 }
 
 # Prepare antigen
