@@ -130,15 +130,16 @@ setup_symlinks() {
 setup_vim() {
 	log "Setting up VIM"
 	run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap ~/.vim/undo
-	run "Install plugins" vim +PluginInstall +qall
+	run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
 	sleep 0.5
+	run "Ensure xon isn't set" stty -ixon
 	run "Make tty sane" stty sane
 }
 
 # Prepare antigen
 setup_zsh() {
 	log "Setting up zsh"
-	run "Initialising zsh" zsh ~/.zshrc
+	run "Initialising zsh" eval "zsh ~/.zshrc > /dev/null" # Avoid garbage
 	run "Changing user shell" sudo chsh -s $(which zsh) $USER
 }
 
