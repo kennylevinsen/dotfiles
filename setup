@@ -95,7 +95,7 @@ run() {
 	if [ "$success" = "1" ]
 	then
 		echo $output
-		error "FAILED, check .setup_log for details"
+		error "FAILED, check $LOGFILE for details"
 	fi
 }
 
@@ -129,7 +129,7 @@ setup_symlinks() {
 # Prepare vim
 setup_vim() {
 	log "Setting up VIM"
-	run "Make extra .vim subdirectories" mkdir ~/.vim/backup ~/.vim/swap ~/.vim/undo
+	run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap ~/.vim/undo
 	run "Install plugins" vim +PluginInstall +qall
 	sleep 0.5
 	run "Make tty sane" stty sane
