@@ -7,6 +7,8 @@
 # TODO Use symlinks to .dotfiles dir
 
 GITPATH=https://github.com/Joushou/dotfiles.git
+TARGET=~/.dotfiles
+LOGFILE=$TARGET/setup_log
 
 # Toggles for command-line options
 OPT_UPGRADE=0
@@ -17,6 +19,7 @@ OPT_CASK=0
 OPT_CONF=0
 OPT_TOOLCHAIN=0
 OPT_SHELL=0
+OPT_GITCLONE=0
 OPT_DUPES=0
 OPT_VERBOSE=1
 
@@ -52,31 +55,31 @@ is_set() {
 # Checks if the tool is available
 in_path() {
 	ret=which $1 1>/dev/null 2>/dev/null
-	printf '%b' "[tool availability check for $1: $ret]\n" >> .setup_log
+	printf '%b' "[tool availability check for $1: $ret]\n" >> $LOGFILE
 	return $ret
 }
 
 # Log error and exit
 error() {
 	printf '%b' "$RED_START! $1$COLOR_END\n"
-	printf '%b' "! $1\n" >> .setup_log
+	printf '%b' "! $1\n" >> $LOGFILE
 	exit 1
 }
 
 # Log
 log() {
 	printf '%b' "$GREEN_START> $WHITE_START$1$COLOR_END\n"
-	printf '%b' "> $1\n" >> .setup_log
+	printf '%b' "> $1\n" >> $LOGFILE
 }
 
 # Run, log and handle error
 run() {
 	printf '%b' "$GREEN_START>    $YELLOW_START$1$COLOR_END\n"
-	printf '%b' ">    $1\n" >> .setup_log
+	printf '%b' ">    $1\n" >> $LOGFILE
 	cmd=${@#$1}
 	success=1
 
-	printf '%b' "[$1: $cmd]\n" >> .setup_log
+	printf '%b' "[$1: $cmd]\n" >> $LOGFILE
 
 	# TODO Fix logging in verbose mode
 
@@ -84,10 +87,10 @@ run() {
 	then
 		is_set $OPT_DRYRUN || $cmd && success=0
 	else
-		is_set $OPT_DRYRUN || $cmd >> .setup_log 2>&1 && success=0
+		is_set $OPT_DRYRUN || $cmd >> $LOGFILE 2>&1 && success=0
 	fi
 
-	printf '%b' "\n" >> .setup_log
+	printf '%b' "\n" >> $LOGFILE
 
 	if [ "$success" = "1" ]
 	then
@@ -113,10 +116,20 @@ setup_git() {
 	run "Setting upstream" git branch --set-upstream-to=origin/master master
 }
 
+# Setup symlinks
+setup_symlinks() {
+	log "Setting up symlinks"
+	run "zshrc" ln -s $TARGET/zshrc ~/.zshrc
+	run "antigen" ln -s $TARGET/antigen ~/.antigen
+	run "vimrc" ln -s $TARGET/vimrc ~/.vimrc
+	run "gvimrc" ln -s $TARGET/gvimrc ~/.gvimrc
+	run "vim" ln -s $TARGET/vim ~/.vim
+}
+
 # Prepare vim
 setup_vim() {
 	log "Setting up VIM"
-	run "Make extra .vim subdirectories" mkdir .vim/backup .vim/swap .vim/undo
+	run "Make extra .vim subdirectories" mkdir ~/.vim/backup ~/.vim/swap ~/.vim/undo
 	run "Install plugins" vim +PluginInstall +qall
 	sleep 0.5
 	run "Make tty sane" stty sane
@@ -125,14 +138,14 @@ setup_vim() {
 # Prepare antigen
 setup_zsh() {
 	log "Setting up zsh"
-	run "Cloning antigen" git clone https://github.com/zsh-users/antigen.git .antigen
-	run "Initialising zsh" zsh .zshrc
+	run "Initialising zsh" zsh ~/.zshrc
 	run "Changing user shell" sudo chsh -s $(which zsh) $USER
 }
 
 # Setup dispatcher
 setup() {
-	setup_git
+	is_set $GIT_CLONE && setup_git
+	setup_symlinks
 	setup_vim
 	is_set $OPT_SHELL && setup_zsh
 }
@@ -247,8 +260,8 @@ post_linux() {
 #                                                                             #
 ###############################################################################
 
-
-cd ~
+mkdir $TARGET
+cd $TARGET
 
 #
 # Handle parameters
@@ -281,6 +294,9 @@ do
 			;;
 		--no-dupes)
 			OPT_DUPES=1
+			;;
+		--no-gitclone)
+			OPT_GITCLONE=1
 			;;
 		--dry-run)
 			OPT_DRYRUN=0
