@@ -25,20 +25,20 @@ OPT_VERBOSE=1
 
 # Color stuff
 case $TERM in
-	xterm*)
-		RED_START="\033[1;31m"
-		GREEN_START="\033[1;32m"
-		YELLOW_START="\033[1;33m"
-		WHITE_START="\033[1;37m"
-		COLOR_END="\033[0m"
-		;;
-	screen*)
-		RED_START="\033[1;31m"
-		GREEN_START="\033[1;32m"
-		YELLOW_START="\033[1;33m"
-		WHITE_START="\033[1;37m"
-		COLOR_END="\033[0m"
-		;;
+    xterm*)
+        RED_START="\033[1;31m"
+        GREEN_START="\033[1;32m"
+        YELLOW_START="\033[1;33m"
+        WHITE_START="\033[1;37m"
+        COLOR_END="\033[0m"
+        ;;
+    screen*)
+        RED_START="\033[1;31m"
+        GREEN_START="\033[1;32m"
+        YELLOW_START="\033[1;33m"
+        WHITE_START="\033[1;37m"
+        COLOR_END="\033[0m"
+        ;;
 esac
 
 ###############################################################################
@@ -49,54 +49,54 @@ esac
 
 # This is stupid, but it works
 is_set() {
-	return $1
+    return $1
 }
 
 # Checks if the tool is available
 in_path() {
-	ret=which $1 1>/dev/null 2>/dev/null
-	printf '%b' "[tool availability check for $1: $ret]\n" >> $LOGFILE
-	return $ret
+    ret=which $1 1>/dev/null 2>/dev/null
+    printf '%b' "[tool availability check for $1: $ret]\n" >> $LOGFILE
+    return $ret
 }
 
 # Log error and exit
 error() {
-	printf '%b' "$RED_START! $1$COLOR_END\n"
-	printf '%b' "! $1\n" >> $LOGFILE
-	exit 1
+    printf '%b' "$RED_START! $1$COLOR_END\n"
+    printf '%b' "! $1\n" >> $LOGFILE
+    exit 1
 }
 
 # Log
 log() {
-	printf '%b' "$GREEN_START> $WHITE_START$1$COLOR_END\n"
-	printf '%b' "> $1\n" >> $LOGFILE
+    printf '%b' "$GREEN_START> $WHITE_START$1$COLOR_END\n"
+    printf '%b' "> $1\n" >> $LOGFILE
 }
 
 # Run, log and handle error
 run() {
-	printf '%b' "$GREEN_START>    $YELLOW_START$1$COLOR_END\n"
-	printf '%b' ">    $1\n" >> $LOGFILE
-	cmd=${@#$1}
-	success=1
+    printf '%b' "$GREEN_START>    $YELLOW_START$1$COLOR_END\n"
+    printf '%b' ">    $1\n" >> $LOGFILE
+    cmd=${@#$1}
+    success=1
 
-	printf '%b' "[$1: $cmd]\n" >> $LOGFILE
+    printf '%b' "[$1: $cmd]\n" >> $LOGFILE
 
-	# TODO Fix logging in verbose mode
+    # TODO Fix logging in verbose mode
 
-	if is_set $OPT_VERBOSE
-	then
-		is_set $OPT_DRYRUN || $cmd && success=0
-	else
-		is_set $OPT_DRYRUN || $cmd >> $LOGFILE 2>&1 && success=0
-	fi
+    if is_set $OPT_VERBOSE
+    then
+        is_set $OPT_DRYRUN || $cmd && success=0
+    else
+        is_set $OPT_DRYRUN || $cmd >> $LOGFILE 2>&1 && success=0
+    fi
 
-	printf '%b' "\n" >> $LOGFILE
+    printf '%b' "\n" >> $LOGFILE
 
-	if [ "$success" = "1" ]
-	then
-		echo $output
-		error "FAILED, check $LOGFILE for details"
-	fi
+    if [ "$success" = "1" ]
+    then
+        echo $output
+        error "FAILED, check $LOGFILE for details"
+    fi
 }
 
 ###############################################################################
@@ -107,48 +107,48 @@ run() {
 
 # Setup the dotfile git repo
 setup_git() {
-	log "Setting up dotfiles repo"
-	# Hacky "DIR IS NOT EMPTY!" workaround
-	run "Initialising git" git init
-	run "Adding remote" git remote add origin $GITPATH
-	run "Pulling master" git pull --force origin master
-	run "Initialising submodules" git submodule update --init
-	run "Setting upstream" git branch --set-upstream-to=origin/master master
+    log "Setting up dotfiles repo"
+    # Hacky "DIR IS NOT EMPTY!" workaround
+    run "Initialising git" git init
+    run "Adding remote" git remote add origin $GITPATH
+    run "Pulling master" git pull --force origin master
+    run "Initialising submodules" git submodule update --init
+    run "Setting upstream" git branch --set-upstream-to=origin/master master
 }
 
 # Setup symlinks
 setup_symlinks() {
-	log "Setting up symlinks"
-	run "zshrc" ln -s $TARGET/zshrc ~/.zshrc
-	run "antigen" ln -s $TARGET/antigen ~/.antigen
-	run "vimrc" ln -s $TARGET/vimrc ~/.vimrc
-	run "gvimrc" ln -s $TARGET/gvimrc ~/.gvimrc
-	run "vim" ln -s $TARGET/vim ~/.vim
+    log "Setting up symlinks"
+    run "zshrc" ln -s $TARGET/zshrc ~/.zshrc
+    run "antigen" ln -s $TARGET/antigen ~/.antigen
+    run "vimrc" ln -s $TARGET/vimrc ~/.vimrc
+    run "gvimrc" ln -s $TARGET/gvimrc ~/.gvimrc
+    run "vim" ln -s $TARGET/vim ~/.vim
 }
 
 # Prepare vim
 setup_vim() {
-	log "Setting up VIM"
-	run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap ~/.vim/undo
-	run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
-	sleep 0.5
-	run "Ensure xon isn't set" eval "stty -ixon || true"
-	run "Make tty sane" eval "stty sane || true"
+    log "Setting up VIM"
+    run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap ~/.vim/undo
+    run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
+    sleep 0.5
+    run "Ensure xon isn't set" eval "stty -ixon || true"
+    run "Make tty sane" eval "stty sane || true"
 }
 
 # Prepare antigen
 setup_zsh() {
-	log "Setting up zsh"
-	run "Initialising zsh" eval "zsh ~/.zshrc > /dev/null" # Avoid garbage
-	run "Changing user shell" sudo chsh -s $(which zsh) $USER
+    log "Setting up zsh"
+    run "Initialising zsh" eval "zsh ~/.zshrc > /dev/null" # Avoid garbage
+    run "Changing user shell" sudo chsh -s $(which zsh) $USER
 }
 
 # Setup dispatcher
 setup() {
-	is_set $OPT_GITCLONE && setup_git
-	setup_symlinks
-	setup_vim
-	is_set $OPT_SHELL && setup_zsh
+    is_set $OPT_GITCLONE && setup_git
+    setup_symlinks
+    setup_vim
+    is_set $OPT_SHELL && setup_zsh
 }
 
 ###############################################################################
@@ -160,20 +160,20 @@ setup() {
 
 # Set defaults
 osx_conf() {
-	log "Configuring OS X"
-	run "Be silent on boot" sudo nvram SystemAudioVolume=" "
-	run "Increasing window resize speed" defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
-	run "Increasing mission control animation speed" defaults write com.apple.dock expose-animation-duration -float 0.1
-	run "Setting fast key repeat" defaults write NSGlobalDomain KeyRepeat -int 0
-	run "Always use sub-pixel font rendering" defaults write NSGlobalDomain AppleFontSmoothing -int 2
-	run "Setting Dock scaling effect" defaults write com.apple.dock mineffect -string "scale"
-	run "Setting Terminal.app UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
+    log "Configuring OS X"
+    run "Be silent on boot" sudo nvram SystemAudioVolume=" "
+    run "Increasing window resize speed" defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
+    run "Increasing mission control animation speed" defaults write com.apple.dock expose-animation-duration -float 0.1
+    run "Setting fast key repeat" defaults write NSGlobalDomain KeyRepeat -int 0
+    run "Always use sub-pixel font rendering" defaults write NSGlobalDomain AppleFontSmoothing -int 2
+    run "Setting Dock scaling effect" defaults write com.apple.dock mineffect -string "scale"
+    run "Setting Terminal.app UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
 }
 
 # Install brew
 brew_install() {
-	run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-	run "Making paths file" sudo tee /etc/paths <<EOS
+    run "Install brew" ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    run "Making paths file" sudo tee /etc/paths <<EOS
 /usr/local/bin
 /usr/local/opt/coreutils/libexec/gnubin
 /usr/bin
@@ -182,42 +182,42 @@ brew_install() {
 /usr/sbin
 /sbin
 EOS
-	eval $(/usr/libexec/path_helper -s)
+    eval $(/usr/libexec/path_helper -s)
 }
 
 # Setup brew and install packages
 pre_osx() {
-	is_set $OPT_CONF &&			osx_conf
+    is_set $OPT_CONF &&      osx_conf
 
-										log "Installing packages"
-	in_path brew ||				brew_install
+                             log "Installing packages"
+    in_path brew ||          brew_install
 
-	is_set $OPT_UPDATE &&		run "Updating brew" brew update
-	is_set $OPT_UPGRADE &&		run "Upgrading brew" brew upgrade
-	is_set $OPT_VERIFY &&		run "Verifying brew" brew doctor
+    is_set $OPT_UPDATE &&    run "Updating brew" brew update
+    is_set $OPT_UPGRADE &&   run "Upgrading brew" brew upgrade
+    is_set $OPT_VERIFY &&    run "Verifying brew" brew doctor
 
-	is_set $OPT_DUPES &&			run "Installing dupe tap" brew tap homebrew/dupes
+    is_set $OPT_DUPES &&     run "Installing dupe tap" brew tap homebrew/dupes
 
-	is_set $OPT_CASK &&			run "Setting up cask" brew install caskroom/cask/brew-cask
-	
-										# TODO zsh is technically a dupe, as zsh is bundled in old version
-	is_set $OPT_SHELL &&			run "Shell" brew install tmux zsh
-	is_set $OPT_DUPES &&			run "Newer shell utils" brew install coreutils findutils grep
-										run "Shell utils" brew install ascii
-										run "Version control" brew install git mercurial
-										run "Code assist" brew install ctags
-	is_set $OPT_TOOLCHAIN &&	run "Toolchain" brew install autoconf automake go
+    is_set $OPT_CASK &&      run "Setting up cask" brew install caskroom/cask/brew-cask
+    
+                             # TODO zsh is technically a dupe, as zsh is bundled in old version
+    is_set $OPT_SHELL &&     run "Shell" brew install tmux zsh
+    is_set $OPT_DUPES &&     run "Newer shell utils" brew install coreutils findutils grep
+                             run "Shell utils" brew install ascii
+                             run "Version control" brew install git mercurial
+                             run "Code assist" brew install ctags
+    is_set $OPT_TOOLCHAIN && run "Toolchain" brew install autoconf automake go
 
-										# editor stuff
-	is_set $OPT_DUPES &&			run "VIM" brew install vim
-	is_set $OPT_CASK &&			run "MacVIM" brew cask install macvim
+                             # editor stuff
+    is_set $OPT_DUPES &&     run "VIM" brew install vim
+    is_set $OPT_CASK &&      run "MacVIM" brew cask install macvim
 }
 
 # Cleanup after brew and git
 post_osx() {
-	log "Cleaning up"
-	run "Git" git gc --aggressive
-	run "Brew" brew cleanup
+    log "Cleaning up"
+    run "Git" git gc --aggressive
+    run "Brew" brew cleanup
 }
 
 ###############################################################################
@@ -229,30 +229,30 @@ post_osx() {
 
 # Install packages
 pre_linux() {
-	if in_path apt-get
-	then
-		log "Installing packages with APT"
-		is_set $OPT_UPDATE &&		run "Updating APT" sudo apt-get -y update
-		is_set $OPT_UPGRADE &&		run "Upgrading packages" sudo apt-get -y upgrade
-		
-		is_set $OPT_SHELL &&			run "Shell" sudo apt-get -y install tmux zsh
-											run "Shell utils" sudo apt-get -y install ascii
-											run "Version control" sudo apt-get -y install git mercurial
-											run "Code assist" sudo apt-get -y install ctags
-		is_set $OPT_TOOLCHAIN &&	run "Toolchain" sudo apt-get -y install binutils autoconf automake gdb clang golang
+    if in_path apt-get
+    then
+                                    log "Installing packages with APT"
+        is_set $OPT_UPDATE &&       run "Updating APT" sudo apt-get -y update
+        is_set $OPT_UPGRADE &&      run "Upgrading packages" sudo apt-get -y upgrade
 
-											# editor stuff
-											run "VIM" sudo apt-get -y install vim
-	else
-		error "Package manager unknown"
-	fi
+        is_set $OPT_SHELL &&        run "Shell" sudo apt-get -y install tmux zsh
+                                    run "Shell utils" sudo apt-get -y install ascii
+                                    run "Version control" sudo apt-get -y install git mercurial
+                                    run "Code assist" sudo apt-get -y install ctags
+        is_set $OPT_TOOLCHAIN &&    run "Toolchain" sudo apt-get -y install binutils autoconf automake gdb clang golang
+
+                                    # editor stuff
+                                    run "VIM" sudo apt-get -y install vim
+    else
+        error "Package manager unknown"
+    fi
 }
 
 # Cleanup apt and git
 post_linux() {
-								log "Cleaning up"
-								run "Git" git gc --aggressive
-	in_path apt-get &&	run "APT" sudo apt-get clean
+                        log "Cleaning up"
+                        run "Git" git gc --aggressive
+    in_path apt-get &&  run "APT" sudo apt-get clean
 }
 
 ###############################################################################
@@ -271,44 +271,44 @@ cd $TARGET
 
 for i in $@
 do
-	case $i in
-		--no-upgrade)
-			OPT_UPGRADE=1
-			;;
-		--no-update)
-			OPT_UPDATE=1
-			;;
-		--no-verify)
-			OPT_VERIFY=1
-			;;
-		--no-cask)
-			OPT_CASK=1
-			;;
-		--no-conf)
-			OPT_CONF=1
-			;;
-		--no-toolchain)
-			OPT_TOOLCHAIN=1
-			;;
-		--no-shell)
-			OPT_SHELL=1
-			;;
-		--no-dupes)
-			OPT_DUPES=1
-			;;
-		--no-gitclone)
-			OPT_GITCLONE=1
-			;;
-		--dry-run)
-			OPT_DRYRUN=0
-			;;
-		--verbose)
-			OPT_VERBOSE=0
-			;;
-		*)
-			error "Unknown parameter: $i"
-			;;
-	esac
+    case $i in
+        --no-upgrade)
+            OPT_UPGRADE=1
+            ;;
+        --no-update)
+            OPT_UPDATE=1
+            ;;
+        --no-verify)
+            OPT_VERIFY=1
+            ;;
+        --no-cask)
+            OPT_CASK=1
+            ;;
+        --no-conf)
+            OPT_CONF=1
+            ;;
+        --no-toolchain)
+            OPT_TOOLCHAIN=1
+            ;;
+        --no-shell)
+            OPT_SHELL=1
+            ;;
+        --no-dupes)
+            OPT_DUPES=1
+            ;;
+        --no-gitclone)
+            OPT_GITCLONE=1
+            ;;
+        --dry-run)
+            OPT_DRYRUN=0
+            ;;
+        --verbose)
+            OPT_VERBOSE=0
+            ;;
+        *)
+            error "Unknown parameter: $i"
+            ;;
+    esac
 done
 
 log "Starting setup"
@@ -321,30 +321,30 @@ run "Requesting sudo rights" sudo -v
 # TODO BSD?
 
 case "$OSTYPE" in
-	darwin*)
-		log "OS X detected"
-		pre_osx
-		setup
-		post_osx
-		;;
-	linux*)
-		log "Linux detected"
-		pre_linux
-		setup
-		post_linux
-		;;
-	*)
-		# We might just be on a dash-based OS which doesn't give us OSTYPE (ubuntu/debian)
-		if [ -e /etc/debian_version ]
-		then
-			pre_linux
-			setup
-			post_linux
-		else
-			
-			error "Platform of type $OSTYPE not supported"
-		fi
-		;;
+    darwin*)
+        log "OS X detected"
+        pre_osx
+        setup
+        post_osx
+        ;;
+    linux*)
+        log "Linux detected"
+        pre_linux
+        setup
+        post_linux
+        ;;
+    *)
+        # We might just be on a dash-based OS which doesn't give us OSTYPE (ubuntu/debian)
+        if [ -e /etc/debian_version ]
+        then
+            pre_linux
+            setup
+            post_linux
+        else
+            
+            error "Platform of type $OSTYPE not supported"
+        fi
+        ;;
 esac
 
 log "All done"
