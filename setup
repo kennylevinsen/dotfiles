@@ -265,7 +265,7 @@ post_linux() {
 # Handle parameters
 #
 # TODO: Add force OS option
-
+mkdir -p $TARGET
 for i in $@
 do
     case $i in
@@ -309,7 +309,6 @@ do
 done
 
 log "Starting setup"
-run "Making directory" mkdir -p $TARGET
 run "Entering directory" cd $TARGET
 run "Requesting sudo rights" sudo -v
 
