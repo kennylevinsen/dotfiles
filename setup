@@ -113,7 +113,6 @@ setup_git() {
     run "Adding remote" git remote add origin $GITPATH
     run "Pulling master" git pull --force origin master
     run "Initialising submodules" git submodule update --init
-    run "Setting upstream" git branch --set-upstream-to=origin/master master
 }
 
 # Setup symlinks
