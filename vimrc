@@ -37,6 +37,7 @@ let g:airline#extensions#tabline#enabled = 1
 " Line-wrap, tabs, bracket matching
 set wrap
 set linebreak
+set expandtab
 set shiftwidth=3
 set tabstop=3
 set autoindent
@@ -79,7 +80,35 @@ set ttyfast                    " Optimize for fast terminal connections
 set clipboard=unnamed          " Use OS clipboard by default
 set hidden                     " Allow hidden buffers
 
-" Mappings
-noremap <C-e> <End>
-noremap <C-a> <Home>
+" Helper functions
+function! LineHome()
+   let x = col('.')
+   execute "normal ^"
+   if x == col('.')
+      execute "normal 0"
+   endif
+   return ""
+endfunction
 
+"
+" Mappings
+"
+
+" C-a/C-e home/end handling
+map <silent> <C-e> <End>
+imap <silent> <C-e> <End>
+map <silent> <C-a> <Home>
+nmap <silent> <C-a> :call LineHome()<CR>
+imap <silent> <C-a> <C-R>=LineHome()<CR>
+
+" C-z as undo - Disables ability to suspend VIM
+"map <C-z> :normal u<CR>
+"imap <C-z> <C-o>u
+
+" Command-z/Command-Shift-z undo/redo
+map <D-z> :normal u<CR>
+imap <D-z> <C-o>u
+map <D-S-z> <C-r>
+imap <D-S-z> <C-o><C-r>
+
+nmap <C-t> :CtrlPTag<CR>
