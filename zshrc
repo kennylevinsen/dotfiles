@@ -32,3 +32,8 @@ robbyrussell/oh-my-zsh plugins/mosh
 EOB
 antigen theme Joushou/zsh kardan
 antigen apply
+
+if [ -e ~/.env ]
+then
+   source ~/.env
+fi
