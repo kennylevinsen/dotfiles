@@ -54,7 +54,8 @@ is_set() {
 
 # Checks if the tool is available
 in_path() {
-    ret=which $1 1>/dev/null 2>/dev/null
+    which $1 1>/dev/null 2>/dev/null
+    ret=$?
     printf '%b' "[tool availability check for $1: $ret]\n" >> $LOGFILE
     return $ret
 }
@@ -242,6 +243,16 @@ pre_linux() {
 
                                     # editor stuff
                                     run "VIM" sudo apt-get -y install vim
+    elif in_path yum
+    then
+        log "Installing packages with YUM"
+        is_set $OPT_UPGRADE &&      run "Updating YUM" sudo yum -y update
+        is_set $OPT_SHELL &&        run "Shell" sudo yum -y install tmux zsh
+                                    run "Shell utils" sudo yum -y install ascii
+                                    run "Version control" sudo yum -y install git mercurial
+                                    run "Code assist" sudo yum -y install ctags
+        is_set $OPT_TOOLCHAIN &&    run "Toolchain" sudo yum -y install binutils autoconf automake gdb clang golang
+                                    run "VIM" sudo yum -y install vim
     else
         error "Package manager unknown"
     fi
