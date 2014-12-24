@@ -16,6 +16,7 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'tpope/vim-fugitive'
 Plugin 'bling/vim-airline'
 Plugin 'fatih/vim-go'
+Plugin 'rizzatti/dash.vim'
 
 " <Vundle stuff>
 call vundle#end()
