@@ -7,7 +7,8 @@
 # TODO Use symlinks to .dotfiles dir
 
 GITPATH=https://github.com/Joushou/dotfiles.git
-TARGET=~/.dotfiles
+USERHOME=~
+TARGET=$USERHOME/.dotfiles
 LOGFILE=$TARGET/setup_log
 
 # Toggles for command-line options
@@ -168,6 +169,7 @@ osx_conf() {
     run "Always use sub-pixel font rendering" defaults write NSGlobalDomain AppleFontSmoothing -int 2
     run "Setting Dock scaling effect" defaults write com.apple.dock mineffect -string "scale"
     run "Setting Terminal.app UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
+    run "Unhiding ~/Library" chflags nohidden $USERHOME/Library
 }
 
 # Install brew
@@ -210,7 +212,7 @@ pre_osx() {
 
                              # editor stuff
     is_set $OPT_DUPES &&     run "VIM" brew install vim
-    is_set $OPT_CASK &&      run "MacVIM" brew cask install macvim
+    is_set $OPT_CASK &&      run "MacVIM" brew cask install macvim flashlight iterm arduino
 }
 
 # Cleanup after brew and git
