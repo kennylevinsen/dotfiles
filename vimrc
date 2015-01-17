@@ -1,5 +1,6 @@
 " Go away VI!
 set nocompatible
+set shell=/bin/sh
 
 " <Vundle stuff>
 filetype off

@@ -269,6 +269,37 @@ post_linux() {
 
 ###############################################################################
 #                                                                             #
+# FreeBSD                                                                     #
+#                                                                             #
+###############################################################################
+
+# Install packages
+pre_freebsd() {
+    if in_path pkg
+    then
+                                    log "Installing packages with pkg"
+
+        is_set $OPT_SHELL &&        run "Shell" sudo ASSUME_ALWAYS_YES=true pkg install tmux zsh
+                                    run "Version control" sudo ASSUME_ALWAYS_YES=true pkg install git mercurial
+                                    run "Code assist" sudo ASSUME_ALWAYS_YES=true pkg install ctags
+        is_set $OPT_TOOLCHAIN &&    run "Toolchain" sudo ASSUME_ALWAYS_YES=true pkg install binutils autoconf automake gdb clang-devel llvm-devel go
+
+                                    # editor stuff
+                                    run "VIM" sudo ASSUME_ALWAYS_YES=true pkg install vim
+    else
+        error "Package manager unknown"
+    fi
+}
+
+# Cleanup apt and git
+post_freebsd() {
+                        log "Cleaning up"
+                        run "Git" git gc --aggressive
+    in_path pkg &&      run "pkg" sudo ASSUME_ALWAYS_YES=true pkg clean
+}
+
+###############################################################################
+#                                                                             #
 # Main                                                                        #
 #                                                                             #
 ###############################################################################
@@ -341,6 +372,12 @@ case "$OSTYPE" in
         pre_linux
         setup
         post_linux
+        ;;
+    freebsd*)
+        log "FreeBSD detected"
+        pre_freebsd
+        setup
+        post_freebsd
         ;;
     *)
         # We might just be on a dash-based OS which doesn't give us OSTYPE (ubuntu/debian)
