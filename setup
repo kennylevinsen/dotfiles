@@ -358,26 +358,41 @@ run "Requesting sudo rights" sudo -v
 #
 # OS detect
 #
-# TODO BSD?
+
+darwin() {
+   log "OS X detected"
+   pre_osx
+   setup
+   post_osx
+}
+
+linux() {
+   log "Linux detected"
+   pre_osx
+   setup
+   post_osx
+}
+
+bsd() {
+   log "BSD detected"
+   pre_osx
+   setup
+   post_osx
+}
+
 
 case "$OSTYPE" in
     darwin*)
-        log "OS X detected"
-        pre_osx
-        setup
-        post_osx
+        darwin
         ;;
     linux*)
-        log "Linux detected"
-        pre_linux
-        setup
-        post_linux
+        linux
+        ;;
+    FreeBSD)
+        bsd
         ;;
     freebsd*)
-        log "FreeBSD detected"
-        pre_freebsd
-        setup
-        post_freebsd
+        bsd
         ;;
     *)
         # We might just be on a dash-based OS which doesn't give us OSTYPE (ubuntu/debian)
