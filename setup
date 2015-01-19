@@ -4,7 +4,6 @@
 #
 # Use as you please, but give some credit, will ya'?
 #
-# TODO Use symlinks to .dotfiles dir
 
 GITPATH=https://github.com/Joushou/dotfiles.git
 USERHOME=~
@@ -226,7 +225,7 @@ post_osx() {
 #                                                                             #
 # Linux                                                                       #
 #                                                                             #
-# TODO: Add pacman, yum support.                                              #
+# TODO: Add pacman support.                                                   #
 ###############################################################################
 
 # Install packages
@@ -269,12 +268,12 @@ post_linux() {
 
 ###############################################################################
 #                                                                             #
-# FreeBSD                                                                     #
+# BSD                                                                         #
 #                                                                             #
 ###############################################################################
 
 # Install packages
-pre_freebsd() {
+pre_bsd() {
     if in_path pkg
     then
                                     log "Installing packages with pkg"
@@ -292,7 +291,7 @@ pre_freebsd() {
 }
 
 # Cleanup apt and git
-post_freebsd() {
+post_bsd() {
                         log "Cleaning up"
                         run "Git" git gc --aggressive
     in_path pkg &&      run "pkg" sudo ASSUME_ALWAYS_YES=true pkg clean
@@ -368,16 +367,16 @@ darwin() {
 
 linux() {
    log "Linux detected"
-   pre_osx
+   pre_linux
    setup
-   post_osx
+   post_linux
 }
 
 bsd() {
    log "BSD detected"
-   pre_osx
+   pre_bsd
    setup
-   post_osx
+   post_bsd
 }
 
 
