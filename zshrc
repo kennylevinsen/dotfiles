@@ -1,4 +1,4 @@
-source ~/.dotfiles/zsh/zgen/zgen.zsh
+source ~/.zgen.zsh
 
 autoload colors; colors;
 setopt prompt_subst

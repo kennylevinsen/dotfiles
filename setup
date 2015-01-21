@@ -122,6 +122,8 @@ setup_symlinks() {
     run "zshrc" ln -s $TARGET/zshrc $USERHOME/.zshrc
     run "vimrc" ln -s $TARGET/vimrc $USERHOME/.vimrc
     run "gvimrc" ln -s $TARGET/gvimrc $USERHOME/.gvimrc
+    run "nvimrc" ln -s $TARGET/vimrc $USERHOME/.nvimrc
+    run "nvim" ln -s $USERHOME/.vim $USERHOME/.nvim
 }
 
 # Prepare vim
@@ -139,6 +141,7 @@ setup_vim() {
 # Prepare antigen
 setup_zsh() {
     log "Setting up zsh"
+    run "Downloading zgen" eval "curl https://raw.githubusercontent.com/tarjoilija/zgen/master/zgen.zsh > $USERHOME/.zgen.zsh"
     run "Initialising zsh" eval "zsh $USERHOME/.zshrc > /dev/null" # Avoid garbage
     run "Changing user shell" sudo chsh -s $(which zsh) $USER
 }
