@@ -11,7 +11,7 @@ zgen oh-my-zsh plugins/tmux
 zgen oh-my-zsh plugins/colored-man
 
 zgen load zsh-users/zsh-syntax-highlighting
-zgen load zsh-users/zsh-completion src
+zgen load zsh-users/zsh-completions src
 zgen load zsh-users/zsh-history-substring-search
 
 zgen load joushou/zsh kardan.zsh-theme
