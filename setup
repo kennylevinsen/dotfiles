@@ -214,7 +214,7 @@ pre_osx() {
 
                              # editor stuff
     is_set $OPT_DUPES &&     run "VIM" brew install vim
-    is_set $OPT_CASK &&      run "MacVIM" brew cask install macvim flashlight iterm arduino
+    is_set $OPT_CASK &&      run "MacVIM" brew cask install macvim flashlight iterm2 arduino
 }
 
 # Cleanup after brew and git
