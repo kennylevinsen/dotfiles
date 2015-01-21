@@ -1,7 +1,12 @@
 source ~/.zgen.zsh
 
+# Some assistance
+export HISTFILE=$HOME/.zsh_history
+export HISTSIZE=5000
 autoload colors; colors;
 setopt prompt_subst
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
 
 zgen oh-my-zsh plugins/command-not-found
 zgen oh-my-zsh plugins/git
