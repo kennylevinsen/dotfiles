@@ -1,23 +1,20 @@
-source ~/.antigen/antigen.zsh
+source ~/.dotfiles/zsh/zgen/zgen.zsh
 
-antigen use oh-my-zsh
-antigen bundles <<EOB
+autoload colors; colors;
+setopt prompt_subst
 
-command-not-found
-git
-git-extras
+zgen oh-my-zsh plugins/command-not-found
+zgen oh-my-zsh plugins/git
+zgen oh-my-zsh plugins/git-extras
+zgen oh-my-zsh plugins/debian
+zgen oh-my-zsh plugins/tmux
+zgen oh-my-zsh plugins/colored-man
 
-debian
-tmux
-colored-man
+zgen load zsh-users/zsh-syntax-highlighting
+zgen load zsh-users/zsh-completion src
+zgen load zsh-users/zsh-history-substring-search
 
-zsh-users/zsh-syntax-highlighting
-zsh-users/zsh-completions src
-zsh-users/zsh-history-substring-search
-
-EOB
-antigen theme Joushou/zsh kardan
-antigen apply
+zgen load joushou/zsh kardan.zsh-theme
 
 if [ -e ~/.env ]
 then

@@ -119,17 +119,17 @@ setup_git() {
 # Setup symlinks
 setup_symlinks() {
     log "Setting up symlinks"
-    run "zshrc" ln -s $TARGET/zshrc ~/.zshrc
-    run "antigen" ln -s $TARGET/antigen ~/.antigen
-    run "vimrc" ln -s $TARGET/vimrc ~/.vimrc
-    run "gvimrc" ln -s $TARGET/gvimrc ~/.gvimrc
-    run "vim" ln -s $TARGET/vim ~/.vim
+    run "zshrc" ln -s $TARGET/zshrc $USERHOME/.zshrc
+    run "vimrc" ln -s $TARGET/vimrc $USERHOME/.vimrc
+    run "gvimrc" ln -s $TARGET/gvimrc $USERHOME/.gvimrc
 }
 
 # Prepare vim
 setup_vim() {
     log "Setting up VIM"
-    run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap
+    run "Make extra .vim subdirectories" mkdir -p $USERHOME/.vim/backup $USERHOME/.vim/swap $USERHOME/.vim/colors
+    run "Clone Vundle" git clone https://github.com/gmarik/Vundle.vim.git $USERHOME/.vim/bundle/Vundle.vim
+    run "Download Molokai" eval "curl https://raw.githubusercontent.com/tomasr/molokai/master/colors/molokai.vim > $USERHOME/.vim/colors/molokai.vim"
     run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
     sleep 0.5
     run "Ensure xon isn't set" eval "stty -ixon || true"
@@ -139,7 +139,7 @@ setup_vim() {
 # Prepare antigen
 setup_zsh() {
     log "Setting up zsh"
-    run "Initialising zsh" eval "zsh ~/.zshrc > /dev/null" # Avoid garbage
+    run "Initialising zsh" eval "zsh $USERHOME/.zshrc > /dev/null" # Avoid garbage
     run "Changing user shell" sudo chsh -s $(which zsh) $USER
 }
 
