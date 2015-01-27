@@ -382,18 +382,15 @@ bsd() {
    post_bsd
 }
 
-
-case "$OSTYPE" in
-    darwin*)
+os=$(uname)
+case "$os" in
+    Darwin)
         darwin
         ;;
-    linux*)
+    Linux)
         linux
         ;;
     FreeBSD)
-        bsd
-        ;;
-    freebsd*)
         bsd
         ;;
     *)
