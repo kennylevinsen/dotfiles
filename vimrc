@@ -17,6 +17,9 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'tpope/vim-fugitive'
 Plugin 'bling/vim-airline'
 Plugin 'fatih/vim-go'
+Plugin 'Shougo/vimproc'
+Plugin 'Shougo/vimshell'
+Plugin 'airblade/vim-gitgutter'
 
 " <Vundle stuff>
 call vundle#end()
@@ -69,6 +72,12 @@ set showtabline=2              " Tabline (Thing on the top
 set laststatus=2               " Always show status bar
 set mouse=a                    " Enable mouse in all modes
 set fillchars+=vert:│          " Make the vertical split continuous
+
+" Fix mouse
+if has('mouse_sgr')
+   set ttymouse=sgr
+endif
+
 
 " Vim stuff
 set backupdir=~/.vim/backup    " Backup store
