@@ -8,6 +8,10 @@ setopt prompt_subst
 setopt hist_ignore_space
 setopt hist_ignore_all_dups
 
+# Fix delete key
+bindkey "^[[3~" delete-char
+bindkey "^[3;5~" delete-char
+
 zgen oh-my-zsh plugins/command-not-found
 zgen oh-my-zsh plugins/git
 zgen oh-my-zsh plugins/git-extras
