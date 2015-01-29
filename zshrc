@@ -3,6 +3,7 @@ source ~/.zgen.zsh
 # Some assistance
 export HISTFILE=$HOME/.zsh_history
 export HISTSIZE=5000
+export SAVEHIST=$HISTSIZE
 autoload colors; colors;
 setopt prompt_subst
 setopt hist_ignore_space
