@@ -86,7 +86,6 @@ set backspace=indent,eol,start " Change backspace behaviour to be more sensible
 set whichwrap+=<,>,[,]         " Allow left/right cursor at SOL/EOL to do as expected
 set shortmess=atI              " Slighty change dialogues, suppress intro
 set wildmenu                   " Enhance command line completion
-set ttyfast                    " Optimize for fast terminal connections
 set clipboard=unnamed          " Use OS clipboard by default
 set hidden                     " Allow hidden buffers
 
