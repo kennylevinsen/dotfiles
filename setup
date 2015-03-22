@@ -228,7 +228,6 @@ post_osx() {
 #                                                                             #
 # Linux                                                                       #
 #                                                                             #
-# TODO: Add pacman support.                                                   #
 ###############################################################################
 
 # Install packages
@@ -249,7 +248,7 @@ pre_linux() {
                                     run "VIM" sudo apt-get -y install vim
     elif in_path yum
     then
-        log "Installing packages with YUM"
+                                    log "Installing packages with YUM"
         is_set $OPT_UPGRADE &&      run "Updating YUM" sudo yum -y update
         is_set $OPT_SHELL &&        run "Shell" sudo yum -y install tmux zsh
                                     run "Shell utils" sudo yum -y install ascii
@@ -257,6 +256,17 @@ pre_linux() {
                                     run "Code assist" sudo yum -y install ctags
         is_set $OPT_TOOLCHAIN &&    run "Toolchain" sudo yum -y install binutils autoconf automake gdb clang golang
                                     run "VIM" sudo yum -y install vim
+    elif in_path pacman
+    then
+                                    log "Installing packages with pacman"
+        is_set $OPT_UPDATE &&       run "Updating pacman" sudo pacman --noconfirm -Sy
+        is_set $OPT_UPGRADE &&      run "Upgrading packages" sudo pacman --noconfirm -Su
+                                    run "Shell" sudo pacman --noconfirm -S tmux zsh
+                                    run "Shell utils" sudo pacman --noconfirm -S ascii
+                                    run "Version control" sudo pacman --noconfirm -S git mercurial
+                                    run "Code assist" sudo pacman --noconfirm -S ctags
+        is_set $OPT_TOOLCHAIN &&    run "Toolchain" sudo pacman --noconfirm -S base-devel go
+                                    run "VIM" sudo pacman --noconfirm -S vim
     else
         error "Package manager unknown"
     fi
