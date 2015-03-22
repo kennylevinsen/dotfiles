@@ -250,6 +250,7 @@ pre_linux() {
     then
                                     log "Installing packages with YUM"
         is_set $OPT_UPGRADE &&      run "Updating YUM" sudo yum -y update
+
         is_set $OPT_SHELL &&        run "Shell" sudo yum -y install tmux zsh
                                     run "Shell utils" sudo yum -y install ascii
                                     run "Version control" sudo yum -y install git mercurial
@@ -261,7 +262,8 @@ pre_linux() {
                                     log "Installing packages with pacman"
         is_set $OPT_UPDATE &&       run "Updating pacman" sudo pacman --noconfirm -Sy
         is_set $OPT_UPGRADE &&      run "Upgrading packages" sudo pacman --noconfirm -Su
-                                    run "Shell" sudo pacman --noconfirm -S tmux zsh
+
+        is_set $OPT_SHELL &&        run "Shell" sudo pacman --noconfirm -S tmux zsh
                                     run "Shell utils" sudo pacman --noconfirm -S ascii
                                     run "Version control" sudo pacman --noconfirm -S git mercurial
                                     run "Code assist" sudo pacman --noconfirm -S ctags
