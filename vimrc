@@ -89,6 +89,10 @@ set wildmenu                   " Enhance command line completion
 set clipboard=unnamed          " Use OS clipboard by default
 set hidden                     " Allow hidden buffers
 
+if has('nvim')
+   set clipboard=unnamedplus
+endif
+
 " Helper functions
 function! LineHome()
    let x = col('.')
