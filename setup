@@ -4,10 +4,10 @@
 #
 # Use as you please, but give some credit, will ya'?
 #
-# TODO Use symlinks to .dotfiles dir
 
 GITPATH=https://github.com/Joushou/dotfiles.git
-TARGET=~/.dotfiles
+USERHOME=~
+TARGET=$USERHOME/.dotfiles
 LOGFILE=$TARGET/setup_log
 
 # Toggles for command-line options
@@ -119,17 +119,19 @@ setup_git() {
 # Setup symlinks
 setup_symlinks() {
     log "Setting up symlinks"
-    run "zshrc" ln -s $TARGET/zshrc ~/.zshrc
-    run "antigen" ln -s $TARGET/antigen ~/.antigen
-    run "vimrc" ln -s $TARGET/vimrc ~/.vimrc
-    run "gvimrc" ln -s $TARGET/gvimrc ~/.gvimrc
-    run "vim" ln -s $TARGET/vim ~/.vim
+    run "zshrc" ln -s $TARGET/zshrc $USERHOME/.zshrc
+    run "vimrc" ln -s $TARGET/vimrc $USERHOME/.vimrc
+    run "gvimrc" ln -s $TARGET/gvimrc $USERHOME/.gvimrc
+    run "nvimrc" ln -s $TARGET/vimrc $USERHOME/.nvimrc
+    run "nvim" ln -s $USERHOME/.vim $USERHOME/.nvim
 }
 
 # Prepare vim
 setup_vim() {
     log "Setting up VIM"
-    run "Make extra .vim subdirectories" mkdir -p ~/.vim/backup ~/.vim/swap
+    run "Make extra .vim subdirectories" mkdir -p $USERHOME/.vim/backup $USERHOME/.vim/swap $USERHOME/.vim/colors
+    run "Clone Vundle" git clone https://github.com/gmarik/Vundle.vim.git $USERHOME/.vim/bundle/Vundle.vim
+    run "Download Molokai" eval "curl https://raw.githubusercontent.com/tomasr/molokai/master/colors/molokai.vim > $USERHOME/.vim/colors/molokai.vim"
     run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
     sleep 0.5
     run "Ensure xon isn't set" eval "stty -ixon || true"
@@ -139,7 +141,8 @@ setup_vim() {
 # Prepare antigen
 setup_zsh() {
     log "Setting up zsh"
-    run "Initialising zsh" eval "zsh ~/.zshrc > /dev/null" # Avoid garbage
+    run "Downloading zgen" eval "curl https://raw.githubusercontent.com/tarjoilija/zgen/master/zgen.zsh > $USERHOME/.zgen.zsh"
+    run "Initialising zsh" eval "zsh $USERHOME/.zshrc > /dev/null" # Avoid garbage
     run "Changing user shell" sudo chsh -s $(which zsh) $USER
 }
 
@@ -168,6 +171,7 @@ osx_conf() {
     run "Always use sub-pixel font rendering" defaults write NSGlobalDomain AppleFontSmoothing -int 2
     run "Setting Dock scaling effect" defaults write com.apple.dock mineffect -string "scale"
     run "Setting Terminal.app UTF-8 mode" defaults write com.apple.terminal StringEncodings -array 4
+    run "Unhiding ~/Library" chflags nohidden $USERHOME/Library
 }
 
 # Install brew
@@ -210,7 +214,7 @@ pre_osx() {
 
                              # editor stuff
     is_set $OPT_DUPES &&     run "VIM" brew install vim
-    is_set $OPT_CASK &&      run "MacVIM" brew cask install macvim
+    is_set $OPT_CASK &&      run "MacVIM" brew cask install macvim flashlight iterm2 arduino
 }
 
 # Cleanup after brew and git
@@ -224,7 +228,7 @@ post_osx() {
 #                                                                             #
 # Linux                                                                       #
 #                                                                             #
-# TODO: Add pacman, yum support.                                              #
+# TODO: Add pacman support.                                                   #
 ###############################################################################
 
 # Install packages
@@ -253,7 +257,18 @@ pre_linux() {
                                     run "Code assist" sudo yum -y install ctags
         is_set $OPT_TOOLCHAIN &&    run "Toolchain" sudo yum -y install binutils autoconf automake gdb clang golang
                                     run "VIM" sudo yum -y install vim
-    else
+   elif in_path pacman
+	then
+	   log "Installing packages with Pacman"
+	   is_set $OPT_UPDATE &&		   run "Updating pacman" sudo pacman --noconfirm -Sy
+	   is_set $OPT_UPGRADE && 		   run "Upgrading pacman" sudo pacman --noconfirm -Su
+		                  			   run "Shell" sudo pacman --noconfirm -S tmux zsh
+					                     run "Shell utils" sudo pacman --noconfirm -S ascii
+		                     			run "Version control" sudo pacman --noconfirm -S git mercurial
+					                     run "Code assist" sudo pacman --noconfirm -S ctags
+	   is_set $OPT_TOOLCHAIN &&	   run "Toolchain" sudo pacman --noconfirm -S base-devel go
+					                     run "VIM" sudo pacman --noconfirm -S vim
+   else
         error "Package manager unknown"
     fi
 }
@@ -263,6 +278,37 @@ post_linux() {
                         log "Cleaning up"
                         run "Git" git gc --aggressive
     in_path apt-get &&  run "APT" sudo apt-get clean
+}
+
+###############################################################################
+#                                                                             #
+# BSD                                                                         #
+#                                                                             #
+###############################################################################
+
+# Install packages
+pre_bsd() {
+    if in_path pkg
+    then
+                                    log "Installing packages with pkg"
+
+        is_set $OPT_SHELL &&        run "Shell" sudo ASSUME_ALWAYS_YES=true pkg install tmux zsh
+                                    run "Version control" sudo ASSUME_ALWAYS_YES=true pkg install git mercurial
+                                    run "Code assist" sudo ASSUME_ALWAYS_YES=true pkg install ctags
+        is_set $OPT_TOOLCHAIN &&    run "Toolchain" sudo ASSUME_ALWAYS_YES=true pkg install binutils autoconf automake gdb clang-devel llvm-devel go
+
+                                    # editor stuff
+                                    run "VIM" sudo ASSUME_ALWAYS_YES=true pkg install vim
+    else
+        error "Package manager unknown"
+    fi
+}
+
+# Cleanup apt and git
+post_bsd() {
+                        log "Cleaning up"
+                        run "Git" git gc --aggressive
+    in_path pkg &&      run "pkg" sudo ASSUME_ALWAYS_YES=true pkg clean
 }
 
 ###############################################################################
@@ -325,20 +371,38 @@ run "Requesting sudo rights" sudo -v
 #
 # OS detect
 #
-# TODO BSD?
 
-case "$OSTYPE" in
-    darwin*)
-        log "OS X detected"
-        pre_osx
-        setup
-        post_osx
+darwin() {
+   log "OS X detected"
+   pre_osx
+   setup
+   post_osx
+}
+
+linux() {
+   log "Linux detected"
+   pre_linux
+   setup
+   post_linux
+}
+
+bsd() {
+   log "BSD detected"
+   pre_bsd
+   setup
+   post_bsd
+}
+
+os=$(uname)
+case "$os" in
+    Darwin)
+        darwin
         ;;
-    linux*)
-        log "Linux detected"
-        pre_linux
-        setup
-        post_linux
+    Linux)
+        linux
+        ;;
+    FreeBSD)
+        bsd
         ;;
     *)
         # We might just be on a dash-based OS which doesn't give us OSTYPE (ubuntu/debian)
