@@ -26,7 +26,7 @@ call vundle#end()
 filetype plugin indent on
 " </Vundle stuff>
 
-" Colorscheme 
+" Colorscheme
 set bg=dark
 set t_Co=256
 let g:molokai_original = 1
@@ -89,7 +89,7 @@ set wildmenu                   " Enhance command line completion
 set clipboard=unnamed          " Use OS clipboard by default
 set hidden                     " Allow hidden buffers
 
-if has('nvim')
+if has('nvim') && !empty($DISPLAY)
    set clipboard=unnamedplus
 endif
 
@@ -125,3 +125,7 @@ map <D-S-z> <C-r>
 imap <D-S-z> <C-o><C-r>
 
 nmap <C-t> :CtrlPTag<CR>
+
+if has('nvim')
+   tmap <C-g><C-c> <C-\><C-n>
+endif
