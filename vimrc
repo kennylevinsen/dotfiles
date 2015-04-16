@@ -89,8 +89,12 @@ set wildmenu                   " Enhance command line completion
 set clipboard=unnamed          " Use OS clipboard by default
 set hidden                     " Allow hidden buffers
 
-if has('nvim') && !empty($DISPLAY)
-   set clipboard=unnamedplus
+if !empty($DISPLAY)
+   if has('nvim')
+      set clipboard=unnamedplus
+   else
+      set clipboard=unnamed
+   endif
 endif
 
 " Helper functions
