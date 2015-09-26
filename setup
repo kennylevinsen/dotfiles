@@ -409,11 +409,8 @@ case "$os" in
         # We might just be on a dash-based OS which doesn't give us OSTYPE (ubuntu/debian)
         if [ -e /etc/debian_version ]
         then
-            pre_linux
-            setup
-            post_linux
+            linux
         else
-
             error "Platform of type $OSTYPE not supported"
         fi
         ;;
