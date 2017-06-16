@@ -131,7 +131,6 @@ setup_vim() {
     log "Setting up VIM"
     run "Make extra .vim subdirectories" mkdir -p $USERHOME/.vim/backup $USERHOME/.vim/swap $USERHOME/.vim/colors
     run "Clone Vundle" git clone https://github.com/gmarik/Vundle.vim.git $USERHOME/.vim/bundle/Vundle.vim
-    run "Download Molokai" eval "curl https://raw.githubusercontent.com/tomasr/molokai/master/colors/molokai.vim > $USERHOME/.vim/colors/molokai.vim"
     run "Install plugins" eval "vim +PluginInstall +qall > /dev/null" # Avoid garbage
     sleep 0.5
     run "Ensure xon isn't set" eval "stty -ixon || true"

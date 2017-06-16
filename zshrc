@@ -1,5 +1,8 @@
 source ~/.zgen.zsh
 
+autoload -Uz compinit
+compinit
+
 # Some assistance
 export HISTFILE=$HOME/.zsh_history
 export HISTSIZE=5000
@@ -24,7 +27,7 @@ zgen oh-my-zsh plugins/git
 zgen oh-my-zsh plugins/git-extras
 zgen oh-my-zsh plugins/debian
 zgen oh-my-zsh plugins/tmux
-zgen oh-my-zsh plugins/colored-man
+zgen oh-my-zsh plugins/colored-man-pages
 zgen oh-my-zsh plugins/history
 zgen oh-my-zsh plugins/history-substring-search
 

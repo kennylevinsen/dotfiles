@@ -15,11 +15,13 @@ Plugin 'kien/ctrlp.vim'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
 Plugin 'tpope/vim-fugitive'
-Plugin 'bling/vim-airline'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 Plugin 'fatih/vim-go'
 Plugin 'Shougo/vimproc'
 Plugin 'Shougo/vimshell'
 Plugin 'airblade/vim-gitgutter'
+Plugin 'tomasr/molokai'
 
 " <Vundle stuff>
 call vundle#end()
