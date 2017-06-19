@@ -18,8 +18,6 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'fatih/vim-go'
-Plugin 'Shougo/vimproc'
-Plugin 'Shougo/vimshell'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'tomasr/molokai'
 
@@ -39,6 +37,7 @@ colorscheme molokai
 let g:airline_theme = 'powerlineish'
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
+let NERDTreeIgnore = ['\.o$', '\.pyc$']
 
 " Line-wrap, tabs, bracket matching
 set wrap
