@@ -124,6 +124,7 @@ setup_symlinks() {
     run "gvimrc" ln -s $TARGET/gvimrc $USERHOME/.gvimrc
     run "nvimrc" ln -s $TARGET/vimrc $USERHOME/.nvimrc
     run "nvim" ln -s $USERHOME/.vim $USERHOME/.nvim
+    run "init.vim" mkdir -p $USERHOME/.config/nvim && ln -s $TARGET/vimrc $USERHOME/.config/nvim/init.vim
 }
 
 # Prepare vim

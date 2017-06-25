@@ -1,14 +1,8 @@
-source ~/.zgen.zsh
 
-# Some assistance
+# Various configuration
 export HISTFILE=$HOME/.zsh_history_${HOST}
 export HISTSIZE=5000
 export SAVEHIST=$HISTSIZE
-
-autoload -Uz colors
-colors
-autoload -Uz compinit
-compinit
 
 setopt prompt_subst
 setopt hist_expire_dups_first
@@ -17,9 +11,18 @@ setopt hist_verify
 setopt hist_fcntl_lock
 setopt share_history # share command history data
 
-# Fix delete key
+autoload -Uz colors
+autoload -Uz compinit
+colors
+compinit -u
+
+# Fix keys
 bindkey "^[[3~" delete-char
 bindkey "^[3;5~" delete-char
+bindkey "^[[H" beginning-of-line
+bindkey "^[[F" end-of-line
+bindkey "${terminfo[khome]}" beginning-of-line
+bindkey "${terminfo[kend]}" end-of-line
 
 # Fetch platform information
 ISVM=0
@@ -33,19 +36,27 @@ fi
 ISLOCAL=$( ([ -n "${SSH_TTY}" ] || [ -n "${SSH_CLIENT}" ]) && echo 0 || echo 1)
 PLATFORM="$(uname -s | tr "[A-Z]" "[a-z]")"
 
+# Handle plugins
+ZGEN_AUTOLOAD_COMPINIT=0
+source "${HOME}/.zgen.zsh"
 
-#Plugins
-zgen oh-my-zsh plugins/git
-zgen oh-my-zsh plugins/git-extras
-zgen oh-my-zsh plugins/colored-man-pages
-zgen oh-my-zsh plugins/history-substring-search
+if ! zgen saved
+then
+   #Plugins
+   zgen oh-my-zsh plugins/git
+   zgen oh-my-zsh plugins/git-extras
+   zgen oh-my-zsh plugins/colored-man-pages
+   zgen oh-my-zsh plugins/history-substring-search
 
-hash tmux 2>/dev/null && zgen oh-my-zsh plugins/tmux
+   hash tmux 2>/dev/null && zgen oh-my-zsh plugins/tmux
 
-zgen load zsh-users/zsh-syntax-highlighting
-zgen load zsh-users/zsh-completions src
+   zgen load zsh-users/zsh-syntax-highlighting
+   zgen load zsh-users/zsh-completions src
 
-zgen load kennylevinsen/zsh kardan.zsh-theme
+   zgen load kennylevinsen/zsh kardan.zsh-theme
+
+   zgen save
+fi
 
 # Load extra files
 [ -e ~/.zshrc_platform_${PLATFORM} ] && source ~/.zshrc_platform_${PLATFORM}
