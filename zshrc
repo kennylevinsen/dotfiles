@@ -14,7 +14,7 @@ setopt share_history # share command history data
 autoload -Uz colors
 autoload -Uz compinit
 colors
-compinit -u
+compinit -C
 
 # Fix keys
 bindkey "^[[3~" delete-char
