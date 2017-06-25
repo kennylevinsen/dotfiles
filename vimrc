@@ -14,6 +14,7 @@ call vundle#begin()
 Plugin 'kien/ctrlp.vim'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
+Plugin 'scrooloose/nerdcommenter'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
@@ -106,6 +107,21 @@ function! LineHome()
       execute "normal 0"
    endif
    return ""
+endfunction
+
+command! CloseHiddenBuffers call s:CloseHiddenBuffers()
+function! s:CloseHiddenBuffers()
+   let open_buffers = []
+
+   for i in range(tabpagenr('$'))
+      call extend(open_buffers, tabpagebuflist(i + 1))
+   endfor
+
+   for num in range(1, bufnr("$") + 1)
+      if buflisted(num) && index(open_buffers, num) == -1 && getbufvar(num, '&mod') == 0
+         exec "bdelete ".num
+      endif
+   endfor
 endfunction
 
 "

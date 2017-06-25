@@ -21,17 +21,39 @@ setopt share_history # share command history data
 bindkey "^[[3~" delete-char
 bindkey "^[3;5~" delete-char
 
+# Fetch platform information
+ISVM=0
+if ([ -e /proc/cpuinfo ] && grep "flags.*hypervisor" /proc/cpuinfo > /dev/null) || \
+   ([ -e /proc/bus/pci/devices ] && grep "virtio-pci" /proc/bus/pci/devices > /dev/null) || \
+   (hash pciconf 2>/dev/null && pciconf -l | grep virtio_pci > /dev/null)
+then
+      ISVM=1
+fi
+
+ISLOCAL=$( ([ -n "${SSH_TTY}" ] || [ -n "${SSH_CLIENT}" ]) && echo 0 || echo 1)
+PLATFORM="$(uname -s | tr "[A-Z]" "[a-z]")"
+
+
+#Plugins
 zgen oh-my-zsh plugins/git
 zgen oh-my-zsh plugins/git-extras
-zgen oh-my-zsh plugins/tmux
 zgen oh-my-zsh plugins/colored-man-pages
 zgen oh-my-zsh plugins/history-substring-search
+
+hash tmux 2>/dev/null && zgen oh-my-zsh plugins/tmux
 
 zgen load zsh-users/zsh-syntax-highlighting
 zgen load zsh-users/zsh-completions src
 
-zgen load joushou/zsh kardan.zsh-theme
+zgen load kennylevinsen/zsh kardan.zsh-theme
 
-[ -e ~/.zshrc_${HOST} ] && source ~/.zshrc_${HOST}
+# Load extra files
+[ -e ~/.zshrc_platform_${PLATFORM} ] && source ~/.zshrc_platform_${PLATFORM}
+[ -e ~/.zshrc_host_${HOST} ] && source ~/.zshrc_host_${HOST}
 [ -e ~/.env ] && source ~/.env
-[ -e ~/.env_${HOST} ] && source ~/.env_${HOST}
+[ -e ~/.env_platform_${PLATFORM} ] && source ~/.env_platform_${PLATFORM}
+[ -e ~/.env_host_${HOST} ] && source ~/.env_host_${HOST}
+
+unset ISVM
+unset ISLOCAL
+unset PLATFORM
