@@ -10,8 +10,7 @@ call vundle#begin()
 
 " Plugins
 
-" Plugin 'koturn/vim-clipboard'
-Plugin 'kien/ctrlp.vim'
+Plugin 'junegunn/fzf'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
@@ -20,6 +19,7 @@ Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'fatih/vim-go'
 Plugin 'airblade/vim-gitgutter'
+Plugin 'w0rp/ale'
 Plugin 'tomasr/molokai'
 
 " <Vundle stuff>
@@ -145,7 +145,7 @@ imap <D-z> <C-o>u
 map <D-S-z> <C-r>
 imap <D-S-z> <C-o><C-r>
 
-nmap <C-t> :CtrlPTag<CR>
+nmap <C-t> :FZF<CR>
 
 if has('nvim')
    tmap <C-g><C-c> <C-\><C-n>
