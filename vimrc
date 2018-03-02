@@ -14,6 +14,7 @@ Plugin 'junegunn/fzf'
 Plugin 'majutsushi/tagbar'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'tpope/vim-sleuth'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
@@ -21,6 +22,7 @@ Plugin 'fatih/vim-go'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'w0rp/ale'
 Plugin 'tomasr/molokai'
+Plugin 'qpkoor/vim-bufkill'
 
 " <Vundle stuff>
 call vundle#end()
@@ -128,6 +130,12 @@ endfunction
 " Mappings
 "
 
+" Visual-line navigation
+noremap <silent> k gk
+noremap <silent> j gj
+noremap <silent> <Up> gk
+noremap <silent> <Down> gj
+
 " C-a/C-e home/end handling
 map <silent> <C-e> <End>
 imap <silent> <C-e> <End>
@@ -145,7 +153,7 @@ imap <D-z> <C-o>u
 map <D-S-z> <C-r>
 imap <D-S-z> <C-o><C-r>
 
-nmap <C-t> :FZF<CR>
+nmap <C-t> :FZF ~/src<CR>
 
 if has('nvim')
    tmap <C-g><C-c> <C-\><C-n>

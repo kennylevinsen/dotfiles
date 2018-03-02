@@ -15,6 +15,7 @@ autoload -Uz colors
 autoload -Uz compinit
 colors
 compinit -C
+zstyle ':completion:*' menu select
 
 # Fix keys
 bindkey "^[[3~" delete-char
@@ -43,8 +44,6 @@ source "${HOME}/.zgen.zsh"
 if ! zgen saved
 then
    #Plugins
-   zgen oh-my-zsh plugins/git
-   zgen oh-my-zsh plugins/git-extras
    zgen oh-my-zsh plugins/colored-man-pages
    zgen oh-my-zsh plugins/history-substring-search
 
