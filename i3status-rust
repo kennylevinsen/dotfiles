@@ -1,0 +1,44 @@
+theme = "slick"
+icons = "awesome"
+
+#[[block]]
+#block = "disk_space"
+#path = "/"
+#alias = "/"
+#info_type = "available"
+#unit = "GB"
+#interval = 60
+#warning = 20.0
+#alert = 10.0
+
+#[[block]]
+#block = "memory"
+#display_type = "memory"
+#format_mem = "{Mup}%"
+#format_swap = "{SUp}%"
+
+#[[block]]
+#block = "cpu"
+#interval = 1
+
+#[[block]]
+#block = "load"
+#interval = 1
+#format = "{1m}"
+
+[[block]]
+block = "sound"
+driver = "pulseaudio"
+
+[[block]]
+block = "backlight"
+
+[[block]]
+block = "battery"
+upower = true
+format = "{percentage}$ {power}W {time}"
+
+[[block]]
+block = "time"
+interval = 60
+format = "%a wk %V %d/%m/%Y %R"
