@@ -1,0 +1,90 @@
+/* Outer container */
+#navigator-toolbox {
+  display: flex;
+  flex-direction: row;
+  height: 33px !important;
+  border-bottom: 1px solid black !important;
+}
+
+/* "Nav-bar", navigation buttons/url-bar/extensions */
+#nav-bar {
+  order: 1;
+  flex-grow: 1;
+  display: inline-block;
+  max-width: 1000px;
+  align-items: center;
+ 
+  height: 32px; /* note that 32px is required to get the border */
+  border-right: 1px solid black !important; /* nav/tab-bar border separator */
+}
+
+/* "Nav-bar" inner container. Expand to out size. */
+#nav-bar-customization-target {
+  width: 100%;
+}
+
+#nav-bar-overflow-button {
+  display: none !important;
+}
+
+/* "Titlebar", contains tabs and menubar */
+#titlebar {
+  order: 2;
+  flex-grow: 1;
+  height: 32px !important;
+  /* Make room for hamburger */
+  margin-right: 31px;
+  border-right: 1px solid black;
+}
+
+/* Menubar, hide */
+#toolbar-menubar {
+  display: none;
+}
+
+/* Tab container, expand to consume all titlebar space */
+#TabsToolbar {
+  width: 100%;
+}
+
+/* Tab container container, expand to consume full height */
+#TabsToolbar-customization-target {
+  height: 32px !important; /* expand tabs to full height */
+}
+
+/* Hamburger button container. Embedded within #nav-bar, which is now to the left of tabs.
+   Use fixed positioning to break out of container. */
+#PanelUI-button {
+  position: fixed;
+  top: 2px;
+  right: 0px;
+}
+
+/* Window controls in full-screen (minimize, maximize, close) */
+#window-controls {
+  display: none;
+}
+
+/* Borders around the URL container  for separation */
+#urlbar-container {
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+  min-width: unset !important;
+}
+
+/* URL-bar styling */
+#urlbar {
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  height: 32px !important;
+  min-width: 250px !important;
+}
+
+/* URL-bar hover effect */
+#urlbar:hover {
+  background: rgba(0,0,0,.1) !important;
+}
+
