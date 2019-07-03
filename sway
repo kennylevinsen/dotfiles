@@ -4,156 +4,208 @@
 
 set $mod Mod4
 set $term alacritty
-set $browser env GDK_BACKEND=wayland /opt/mozilla/firefox-nightly/firefox -new-tab
-set $launcher alacritty --class "__sway_launcher" -e sway-launcher
+set $launcher bemenu-run -i -p 'exec:' --fn 'monospace 16' --tf '#00FF00' --hf '#FFFFFF' --nf '#999999'
+#set $launcher alacritty --class "__sway_launcher" -e sway-launcher
+set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
 
 #
 # Startup
 #
 
-exec mako
 exec swayidle -w \
-    timeout 300 'swaylock -f -c 000000' \
-    timeout 600 'swaymsg "output * dpms off"' \
+    timeout 600 '$lock' \
+    timeout 800 'swaymsg "output * dpms off"' \
     resume 'swaymsg "output * dpms on"' \
-    before-sleep 'swaylock -f -c 000000'
+    before-sleep '$lock'
 
-#
-# Inputs and outputs
-#
+exec_always {
+	gsettings set org.gnome.settings-daemon.plugins.xsettings antialiasing 'grayscale'
+	gsettings set org.gnome.settings-daemon.plugins.xsettings hinting 'slight'
+	gsettings set org.gnome.settings-daemon.plugins.xsettings rgba-order 'rgb'
 
-input "1739:30383:DELL07E6:00_06CB:76AF_Touchpad" {
-	dwt enabled
-	tap enabled
-	natural_scroll enabled
-    click_method clickfinger
-	scroll_method two_finger
+	gsettings set org.gnome.desktop.interface gtk-theme 'Yaru'
+	gsettings set org.gnome.desktop.interface icon-theme 'Yaru'
+	gsettings set org.gnome.desktop.interface cursor-theme 'Yaru'
+	gsettings set org.gnome.desktop.wm.preferences button-layout :
+
+	systemctl --user restart mako
+#	systemctl --user restart redshift
+
+	cat /proc/acpi/button/lid/LID0/state | grep -qE 'state:\s+closed' && swaymsg output eDP-1 disable
 }
 
-output * bg /usr/share/backgrounds/Carriage_Return_by_mendhak.jpg stretch
+#
+# Inputs, outputs and seats
+#
+
+input {
+	type:touchpad {
+		click_method clickfinger
+		dwt enabled
+		events enabled
+		tap enabled
+		scroll_method two_finger
+		natural_scroll enabled
+	}
+}
+
+output {
+	* {
+		bg ~/.config/sway/wallpaper.jpg fill
+	}
+}
+
+seat * hide_cursor 1000
 
 #
 # Status bar
 #
 
 bar {
-    position bottom
-    font pango:DejaVu Sans Mono, FontAwesome 12
-    status_command i3status-rs ~/.config/sway/i3status-rust.toml
-    colors {
-        separator #666666
-        background #222222
-        statusline #dddddd
-        focused_workspace #0088CC #0088CC #ffffff
-        active_workspace #333333 #333333 #ffffff
-        inactive_workspace #333333 #333333 #888888
-        urgent_workspace #2f343a #900000 #ffffff
-    }
+	position bottom
+	mode hide
+	font pango:DejaVu Sans Mono, FontAwesome 12
+	status_command i3status-rs ~/.config/sway/i3status-rust.toml
+	colors {
+		separator #666666
+		background #222222BB
+		statusline #dddddd
+		focused_workspace #0088CCDD #0088CCDD #ffffffDD
+		active_workspace #333333DD #333333DD #ffffffDD
+		inactive_workspace #333333AA #333333AA #888888AA
+		urgent_workspace #2f343aBB #900000BB #ffffffBB
+	}
 }
 
 #
 # Few settings
 #
 
+xwayland disable
+gaps inner 8px
 default_border none
 floating_modifier $mod normal
 for_window [app_id="^__sway_launcher$"] floating enable, border none, resize set width 100ppt height 200px, move position 0px 0px
+for_window [app_id="^__sway_popup$"] floating enable, border none, move position center
+
+#
+# Switch bindings
+#
+
+bindswitch {
+	--locked lid:on output eDP-1 disable
+	--locked lid:off output eDP-1 enable
+}
 
 #
 # Key bindings
 #
 
-# Sway control
-bindsym $mod+shift+q kill                 # Kill window
-bindsym $mod+shift+c reload               # Reload sway
-bindsym $mod+shift+b border toggle        # Toggle border
-bindsym $mod+shift+e exec swaynag \
-    -t warning \
-    -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' \
-    -b 'Yes, exit sway' \
-    'swaymsg exit'
+bindsym {
 
-# Execs
-bindsym $mod+l exec swaylock -f -c 000000 # Lock
-bindsym $mod+i exec i3-input              # Sway shell
-bindsym $mod+Return exec $term            # Terminal
-bindsym ctrl+$mod+1 exec $browser         # Browser
-bindsym $mod+d exec $launcher             # Launcher
+	# Sway control
+	$mod+shift+q kill
+	$mod+shift+c reload
+	$mod+shift+b border toggle
+	$mod+shift+e exec swaynag \
+		-t warning \
+		-m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' \
+		-b 'Yes, exit sway' \
+		'swaymsg exit'
 
-# Media keys
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') +1%
-bindsym shift+XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') +10%
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') -1%
-bindsym shift+XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') -10%
-bindsym XF86AudioMute exec pactl set-sink-mute $(pacmd list-sinks | awk '/\* index:/ { print $3; }') toggle
-bindsym XF86MonBrightnessDown exec brightnessctl set 1%-
-bindsym XF86MonBrightnessUp exec brightnessctl set +1%
+	# Execs
+	$mod+l exec $lock
+	$mod+Return exec $term
+	$mod+d exec $launcher
 
-# Focus move
-bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
+	# Media keys
+	XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') +1%
+	shift+XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') +10%
+	XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') -1%
+	shift+XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') -10%
+	XF86AudioMute exec pactl set-sink-mute $(pacmd list-sinks | awk '/\* index:/ { print $3; }') toggle
+	XF86MonBrightnessDown exec brightnessctl set 1%-
+	XF86MonBrightnessUp exec brightnessctl set +1%
 
-# Window move
-bindsym $mod+shift+Left move left
-bindsym $mod+shift+Down move down
-bindsym $mod+shift+Up move up
-bindsym $mod+shift+Right move right
+	# Focus move
+	$mod+Left focus left
+	$mod+Down focus down
+	$mod+Up focus up
+	$mod+Right focus right
 
-# Go to workspace
-bindsym $mod+1 workspace 1
-bindsym $mod+2 workspace 2
-bindsym $mod+3 workspace 3
-bindsym $mod+4 workspace 4
-bindsym $mod+5 workspace 5
-bindsym $mod+6 workspace 6
-bindsym $mod+7 workspace 7
-bindsym $mod+8 workspace 8
-bindsym $mod+9 workspace 9
-bindsym $mod+0 workspace 10
+	# Window move
+	$mod+shift+Left move left
+	$mod+shift+Down move down
+	$mod+shift+Up move up
+	$mod+shift+Right move right
 
-# Switch to workspace
-bindsym $mod+shift+1 move container to workspace 1
-bindsym $mod+shift+2 move container to workspace 2
-bindsym $mod+shift+3 move container to workspace 3
-bindsym $mod+shift+4 move container to workspace 4
-bindsym $mod+shift+5 move container to workspace 5
-bindsym $mod+shift+6 move container to workspace 6
-bindsym $mod+shift+7 move container to workspace 7
-bindsym $mod+shift+8 move container to workspace 8
-bindsym $mod+shift+9 move container to workspace 9
-bindsym $mod+shift+0 move container to workspace 10
+	# Workspace move
+	$mod+alt+Left move workspace to output left
+	$mod+alt+Down move workspace to output down
+	$mod+alt+Up move workspace to output up
+	$mod+alt+Right move workspace to output right
 
-# Set split mode
-bindsym $mod+b splith
-bindsym $mod+v splitv
+	# Go to workspace
+	$mod+1 workspace 1
+	$mod+2 workspace 2
+	$mod+3 workspace 3
+	$mod+4 workspace 4
+	$mod+5 workspace 5
+	$mod+6 workspace 6
+	$mod+7 workspace 7
+	$mod+8 workspace 8
+	$mod+9 workspace 9
+	$mod+0 workspace 10
 
-# Change container layout
-bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
+	# Switch to workspace
+	$mod+shift+1 move container to workspace 1
+	$mod+shift+2 move container to workspace 2
+	$mod+shift+3 move container to workspace 3
+	$mod+shift+4 move container to workspace 4
+	$mod+shift+5 move container to workspace 5
+	$mod+shift+6 move container to workspace 6
+	$mod+shift+7 move container to workspace 7
+	$mod+shift+8 move container to workspace 8
+	$mod+shift+9 move container to workspace 9
+	$mod+shift+0 move container to workspace 10
 
-bindsym $mod+f fullscreen                # Toggle fullscreen
-bindsym $mod+shift+space floating toggle # Toggle floating
-bindsym $mod+space focus mode_toggle     # Floating/tiling focus swap
-bindsym $mod+a focus parent              # Focus parent
+	# Set split mode
+	$mod+b splith
+	$mod+v splitv
 
-# Scratchpad
-bindsym $mod+shift+minus move scratchpad
-bindsym $mod+minus scratchpad show
+	# Change container layout
+	$mod+s layout stacking
+	$mod+w layout tabbed
+	$mod+e layout toggle split
 
-# Resize
-mode "resize" {
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
+	$mod+f fullscreen
+	$mod+shift+f inhibit_fullscreen toggle
+	$mod+shift+space floating toggle
+	$mod+space focus mode_toggle
+	$mod+a focus parent
 
-    bindsym Left resize shrink width 10px
-    bindsym Down resize grow height 10px
-    bindsym Up resize shrink height 10px
-    bindsym Right resize grow width 10px
+	# Scratchpad
+	$mod+shift+minus move scratchpad
+	$mod+minus scratchpad show
 
+	# Modes
+	$mod+r mode "resize"
 }
-bindsym $mod+r mode "resize"
+
+#
+# Modes
+#
+
+mode "resize" {
+	bindsym {
+		Return mode "default"
+		Escape mode "default"
+
+		Left resize shrink width 10px
+		Down resize grow height 10px
+		Up resize shrink height 10px
+		Right resize grow width 10px
+	}
+}
 
 include /etc/sway/config.d/*
