@@ -1,0 +1,29 @@
+#!/bin/bash
+# terminal application launcher for sway, using fzf
+# original command:
+# Based on: https://github.com/swaywm/sway/issues/1367
+# bindsym $altkey+space exec termite --name=launcher -e \
+#    "bash -c 'compgen -c | sort -u | fzf --no-extended --print-query | \
+#    tail -n1 | xargs -r swaymsg -t command exec'"
+
+if [ $(ps aux | grep '[s]way-launcher' | grep '/bin/sh' | wc -l) -gt 1 ]; then
+    echo exit
+    exit 1
+fi
+
+# search command list
+command_str=$(compgen -c | \
+    sort -u | \
+    sed -E 's/^[0-9]+ (.+)$/\1/' | \
+    bemenu -i -p 'exec:' --fn 'monospace 16' --tf '#00FF00' --hf '#FFFFFF' --nf '#999999') || exit 1
+
+if [ "$command_str" == "" ]; then
+    echo exit
+    exit 1
+fi
+
+# execute command
+echo "$command_str"
+swaymsg exec "$command_str"
+
+

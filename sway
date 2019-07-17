@@ -4,8 +4,7 @@
 
 set $mod Mod4
 set $term alacritty
-set $launcher bemenu-run -i -p 'exec:' --fn 'monospace 16' --tf '#00FF00' --hf '#FFFFFF' --nf '#999999'
-#set $launcher alacritty --class "__sway_launcher" -e sway-launcher
+set $launcher exec sway-launcher
 set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
 
 #
@@ -29,7 +28,6 @@ exec_always {
 	gsettings set org.gnome.desktop.wm.preferences button-layout :
 
 	systemctl --user restart mako
-#	systemctl --user restart redshift
 
 	cat /proc/acpi/button/lid/LID0/state | grep -qE 'state:\s+closed' && swaymsg output eDP-1 disable
 }
@@ -81,12 +79,9 @@ bar {
 # Few settings
 #
 
-xwayland disable
 gaps inner 8px
 default_border none
 floating_modifier $mod normal
-for_window [app_id="^__sway_launcher$"] floating enable, border none, resize set width 100ppt height 200px, move position 0px 0px
-for_window [app_id="^__sway_popup$"] floating enable, border none, move position center
 
 #
 # Switch bindings
