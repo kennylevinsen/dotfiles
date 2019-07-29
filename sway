@@ -5,6 +5,7 @@
 set $mod Mod4
 set $term alacritty
 set $launcher exec sway-launcher
+set $dashboard exec /bin/bash -c 'killall wldash; wldash'
 set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
 
 #
@@ -53,7 +54,7 @@ output {
 	}
 }
 
-seat * hide_cursor 1000
+seat * hide_cursor 2000
 
 #
 # Status bar
@@ -82,6 +83,8 @@ bar {
 gaps inner 8px
 default_border none
 floating_modifier $mod normal
+
+for_window [app_id=dashboard] floating enable
 
 #
 # Switch bindings
@@ -112,6 +115,7 @@ bindsym {
 	$mod+l exec $lock
 	$mod+Return exec $term
 	$mod+d exec $launcher
+	$mod+t exec $dashboard
 
 	# Media keys
 	XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') +1%
