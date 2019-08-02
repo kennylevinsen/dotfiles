@@ -1,6 +1,6 @@
 #!/bin/bash
 
-selection="$(dot-desktop | bemenu -i -p 'exec:' --fn 'monospace 16' --tf '#00FF00' --hf '#FFFFFF' --nf '#999999')"
+selection="$(dot-desktop | wldash)"
 if [ "$selection" != "" ]
 then
     command_str="$(DOT_DESKTOP_APP="swaymsg exec" dot-desktop "${selection}")"
