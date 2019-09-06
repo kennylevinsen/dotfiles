@@ -4,7 +4,7 @@
 
 set $mod Mod4
 set $term alacritty
-set $launcher exec sway-launcher
+set $launcher exec wldash start-or-kill
 set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
 
 #
@@ -91,7 +91,7 @@ bindsym {
 		'swaymsg exit'
 
 	# Execs
-	$mod+l exec $lock
+	$mod+l exec killall -SIGUSR1 swayidle
 	$mod+Return exec $term
 	$mod+d exec $launcher
 
