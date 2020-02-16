@@ -11,25 +11,36 @@ set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
 # Startup
 #
 
-exec swayidle -w \
-    timeout 600 '$lock' \
-    timeout 800 'swaymsg "output * dpms off"' \
-    resume 'swaymsg "output * dpms on"' \
-    before-sleep '$lock'
-
 exec_always {
-	gsettings set org.gnome.settings-daemon.plugins.xsettings antialiasing 'grayscale'
-	gsettings set org.gnome.settings-daemon.plugins.xsettings hinting 'slight'
-	gsettings set org.gnome.settings-daemon.plugins.xsettings rgba-order 'rgb'
+	systemctl --user import-environment
+	systemctl --user restart xdg-desktop-portal-gtk.service
+	systemctl --user restart xdg-desktop-portal.service
 
+	# NOTE: Requires SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/keyring/ssh to be exported
+	gnome-keyring-daemon --start
+
+	# Set theme to Yaru and hide useless buttons
 	gsettings set org.gnome.desktop.interface gtk-theme 'Yaru'
 	gsettings set org.gnome.desktop.interface icon-theme 'Yaru'
 	gsettings set org.gnome.desktop.interface cursor-theme 'Yaru'
 	gsettings set org.gnome.desktop.wm.preferences button-layout :
 
-	systemctl --user restart mako
-
 	cat /proc/acpi/button/lid/LID0/state | grep -qE 'state:\s+closed' && swaymsg output eDP-1 disable
+}
+
+exec {
+	# NOTE: This is finicky to ger right
+	# xdg-desktop-portal-wlr
+
+	swayidle -w \
+		timeout 600 '$lock' \
+		timeout 800 'swaymsg "output * dpms off"' \
+		resume 'swaymsg "output * dpms on"' \
+		before-sleep '$lock'
+
+	# NOTE: Kanshi-bug
+	# kanshi
+	mako
 }
 
 #
@@ -45,25 +56,30 @@ input {
 		scroll_method two_finger
 		natural_scroll enabled
 	}
-}
 
-output {
-	* {
-		bg ~/.config/sway/wallpaper.jpg fill
+	type:keyboard {
+		xkb_options compose:caps
 	}
 }
 
-seat * hide_cursor 2000
+output * scale 1
+
+seat * {
+	hide_cursor 2000
+	keyboard_grouping smart
+}
 
 #
 # Few settings
 #
 
-gaps inner 8px
-default_border none
+default_border pixel 1px
+smart_borders on
 floating_modifier $mod normal
 
 for_window [app_id=dashboard] floating enable
+focus_follows_mouse always
+swaybg_command -
 
 #
 # Switch bindings
@@ -84,25 +100,32 @@ bindsym {
 	$mod+shift+q kill
 	$mod+shift+c reload
 	$mod+shift+b border toggle
-	$mod+shift+e exec swaynag \
-		-t warning \
-		-m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' \
-		-b 'Yes, exit sway' \
-		'swaymsg exit'
 
 	# Execs
 	$mod+l exec killall -SIGUSR1 swayidle
 	$mod+Return exec $term
 	$mod+d exec $launcher
+	$mod+shift+v exec pbexec mpv
+	$mod+shift+e exec swaynag \
+		-t warning \
+		-m 'What do you want to do?' \
+		-b 'Exit sway' 'swaymsg exit' \
+		-b 'Lock session' 'killall -USR1 swayidle' \
+		-b 'Poweroff' 'systemctl poweroff' \
+		-b 'Reboot' 'systemctl reboot' \
+		-b 'Suspend' 'systemctl suspend' \
+		-b 'Hibernate' 'systemctl hibernate'
 
 	# Media keys
-	XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') +1%
-	shift+XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') +10%
-	XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') -1%
-	shift+XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks | awk '/\* index:/ { print $3; }') -10%
-	XF86AudioMute exec pactl set-sink-mute $(pacmd list-sinks | awk '/\* index:/ { print $3; }') toggle
+	XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +1%
+	shift+XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +10%
+	XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -1%
+	shift+XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -10%
+	XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
 	XF86MonBrightnessDown exec brightnessctl set 1%-
+	shift+XF86MonBrightnessDown exec brightnessctl set 10%-
 	XF86MonBrightnessUp exec brightnessctl set +1%
+	shift+XF86MonBrightnessUp exec brightnessctl set +10%
 
 	# Focus move
 	$mod+Left focus left
@@ -122,6 +145,16 @@ bindsym {
 	$mod+alt+Up move workspace to output up
 	$mod+alt+Right move workspace to output right
 
+	# Resize
+	$mod+ctrl+Left resize shrink width 10px
+	$mod+ctrl+Right resize grow width 10px
+	$mod+ctrl+Up resize shrink height 10px
+	$mod+ctrl+Down resize grow height 10px
+
+	# Go to next output-specific workspace
+	$mod+tab workspace next_on_output
+	$mod+shift+tab workspace prev_on_output
+
 	# Go to workspace
 	$mod+1 workspace 1
 	$mod+2 workspace 2
@@ -132,7 +165,7 @@ bindsym {
 	$mod+7 workspace 7
 	$mod+8 workspace 8
 	$mod+9 workspace 9
-	$mod+0 workspace 10
+	$mod+0 workspace 0
 
 	# Switch to workspace
 	$mod+shift+1 move container to workspace 1
@@ -144,7 +177,7 @@ bindsym {
 	$mod+shift+7 move container to workspace 7
 	$mod+shift+8 move container to workspace 8
 	$mod+shift+9 move container to workspace 9
-	$mod+shift+0 move container to workspace 10
+	$mod+shift+0 move container to workspace 0
 
 	# Set split mode
 	$mod+b splith
@@ -164,25 +197,6 @@ bindsym {
 	# Scratchpad
 	$mod+shift+minus move scratchpad
 	$mod+minus scratchpad show
-
-	# Modes
-	$mod+r mode "resize"
-}
-
-#
-# Modes
-#
-
-mode "resize" {
-	bindsym {
-		Return mode "default"
-		Escape mode "default"
-
-		Left resize shrink width 10px
-		Down resize grow height 10px
-		Up resize shrink height 10px
-		Right resize grow width 10px
-	}
 }
 
 include /etc/sway/config.d/*
