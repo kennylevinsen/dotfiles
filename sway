@@ -1,4 +1,9 @@
 #
+# Import global configuration. Shared input/output setup is done there.
+#
+include /etc/sway/config.d/*
+
+#
 # Variables
 #
 
@@ -8,6 +13,13 @@ set $launcher exec wldash start-or-kill
 set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
 
 #
+# Global overrides
+#
+
+# Laptop is HiDPI by default, kill that with fire.
+output eDP-1 scale 1
+
+#
 # Startup
 #
 
@@ -15,9 +27,6 @@ exec_always {
 	systemctl --user import-environment
 	systemctl --user restart xdg-desktop-portal-gtk.service
 	systemctl --user restart xdg-desktop-portal.service
-
-	# NOTE: Requires SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/keyring/ssh to be exported
-	gnome-keyring-daemon --start
 
 	# Set theme to Yaru and hide useless buttons
 	gsettings set org.gnome.desktop.interface gtk-theme 'Yaru'
@@ -29,8 +38,14 @@ exec_always {
 }
 
 exec {
-	# NOTE: This is finicky to ger right
+	# NOTE: This is finicky to get right
 	# xdg-desktop-portal-wlr
+
+	# https://gitlab.gnome.org/Archive/policykit-gnome
+	/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
+	# NOTE: Requires SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/keyring/ssh to be exported
+	gnome-keyring-daemon --start
 
 	swayidle -w \
 		timeout 600 '$lock' \
@@ -40,33 +55,8 @@ exec {
 
 	# NOTE: Kanshi-bug
 	# kanshi
-	mako
-}
-
-#
-# Inputs, outputs and seats
-#
-
-input {
-	type:touchpad {
-		click_method clickfinger
-		dwt enabled
-		events enabled
-		tap enabled
-		scroll_method two_finger
-		natural_scroll enabled
-	}
-
-	type:keyboard {
-		xkb_options compose:caps
-	}
-}
-
-output * scale 1
-
-seat * {
-	hide_cursor 2000
-	keyboard_grouping smart
+	poweralertd
+	redshift
 }
 
 #
@@ -105,6 +95,7 @@ bindsym {
 	$mod+l exec killall -SIGUSR1 swayidle
 	$mod+Return exec $term
 	$mod+d exec $launcher
+	$mod+shift+s exec grimshot save win ~/dl/screenshot.png
 	$mod+shift+v exec pbexec mpv
 	$mod+shift+e exec swaynag \
 		-t warning \
@@ -198,5 +189,3 @@ bindsym {
 	$mod+shift+minus move scratchpad
 	$mod+minus scratchpad show
 }
-
-include /etc/sway/config.d/*
