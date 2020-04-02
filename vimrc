@@ -4,7 +4,7 @@ set shell=/bin/sh
 
 " <Vundle stuff>
 filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
+set rtp+=~/.config/nvim/bundle/Vundle.vim
 call vundle#begin()
 " </Vundle stuff>
 
@@ -84,14 +84,14 @@ endif
 
 
 " Vim stuff
-set backupdir=~/.vim/backup    " Backup store
-set directory=~/.vim/swap      " Swap store
-set backspace=indent,eol,start " Change backspace behaviour to be more sensible
-set whichwrap+=<,>,[,]         " Allow left/right cursor at SOL/EOL to do as expected
-set shortmess=atI              " Slighty change dialogues, suppress intro
-set wildmenu                   " Enhance command line completion
-set clipboard=unnamed          " Use OS clipboard by default
-set hidden                     " Allow hidden buffers
+set backupdir=~/.cache/nvim/backup  " Backup store
+set directory=~/.cache/nvim/swap    " Swap store
+set backspace=indent,eol,start      " Change backspace behaviour to be more sensible
+set whichwrap+=<,>,[,]              " Allow left/right cursor at SOL/EOL to do as expected
+set shortmess=atI                   " Slighty change dialogues, suppress intro
+set wildmenu                        " Enhance command line completion
+set clipboard=unnamed               " Use OS clipboard by default
+set hidden                          " Allow hidden buffers
 
 if !empty($DISPLAY)
    if has('nvim')
