@@ -20,6 +20,17 @@ set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
 output eDP-1 scale 1
 
 #
+# Few settings
+#
+
+default_border pixel 1px
+smart_borders on
+floating_modifier $mod normal
+
+focus_follows_mouse always
+swaybg_command -
+
+#
 # Startup
 #
 
@@ -33,8 +44,6 @@ exec_always {
 	gsettings set org.gnome.desktop.interface icon-theme 'Yaru'
 	gsettings set org.gnome.desktop.interface cursor-theme 'Yaru'
 	gsettings set org.gnome.desktop.wm.preferences button-layout :
-
-	cat /proc/acpi/button/lid/LID0/state | grep -qE 'state:\s+closed' && swaymsg output eDP-1 disable
 }
 
 exec {
@@ -59,26 +68,6 @@ exec {
 	redshift
 }
 
-#
-# Few settings
-#
-
-default_border pixel 1px
-smart_borders on
-floating_modifier $mod normal
-
-for_window [app_id=dashboard] floating enable
-focus_follows_mouse always
-swaybg_command -
-
-#
-# Switch bindings
-#
-
-bindswitch {
-	--locked lid:on output eDP-1 disable
-	--locked lid:off output eDP-1 enable
-}
 
 #
 # Key bindings
@@ -188,4 +177,10 @@ bindsym {
 	# Scratchpad
 	$mod+shift+minus move scratchpad
 	$mod+minus scratchpad show
+
+	$mod+shift+p mode passthrough
+}
+
+mode passthrough {
+	bindsym $mod+shift+p mode default
 }
