@@ -85,6 +85,8 @@ bindsym {
 	$mod+Return exec $term
 	$mod+d exec $launcher
 	$mod+shift+s exec grimshot save win ~/dl/screenshot.png
+	$mod+shift+o exec grimshot save output ~/dl/screenshot.png
+	$mod+shift+a exec grimshot save screen ~/dl/screenshot.png
 	$mod+shift+v exec pbexec mpv
 	$mod+shift+e exec swaynag \
 		-t warning \
