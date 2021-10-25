@@ -1,0 +1,17 @@
+input {
+        "1267:9454:ELAN24EE:00_04F3:24EE" {
+                map_to_output eDP-1
+        }
+}
+
+bindswitch {
+	--reload --locked lid:on output eDP-1 disable
+	--reload --locked lid:off exec update-backlight, output eDP-1 enable
+}
+
+exec_always {
+	cat /proc/acpi/button/lid/LID0/state | grep -qE 'state:\s+closed' && swaymsg output eDP-1 disable
+	update-backlight
+}
+
+

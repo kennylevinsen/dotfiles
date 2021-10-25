@@ -1,0 +1,4 @@
+output eDP-1 modeline 522.61 3840 3848 3880 3920 2160 2208 2216 2222 -hsync -vsync
+output eDP-1 scale 1
+output "Goldstar Company Ltd LG Ultra HD 0x00003200" modeline 522.61 3840 3848 3880 3920 2160 2208 2216 2222 +hsync -vsync
+output "Goldstar Company Ltd LG Ultra HD 0x00003202" modeline 522.61 3840 3848 3880 3920 2160 2208 2216 2222 +hsync -vsync

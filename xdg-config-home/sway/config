@@ -1,0 +1,157 @@
+#
+# Import global configuration. Shared input/output setup is done there.
+#
+include /etc/sway/config.d/*
+
+#
+# Startup
+#
+exec {
+	# https://gitlab.gnome.org/Archive/policykit-gnome
+	/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
+	# NOTE: Requires SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/keyring/ssh to be exported
+	gnome-keyring-daemon --start
+
+	swayidle -w
+}
+
+#
+# Variables
+#
+set $mod Mod4
+set $term foot
+set $launcher exec wldash start-or-kill
+#set $launcher wofi --show drun
+set $lock swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg
+
+#
+# Few settings
+#
+default_border pixel 1px
+smart_borders on
+floating_modifier $mod normal
+focus_follows_mouse always
+swaybg_command -
+for_window [app_id=org.gnome.NautilusPreviewer] floating enable
+for_window [tiling] split toggle
+#workspace_namespace output
+
+#
+# Key bindings
+#
+
+bindsym {
+
+	# Sway control
+	$mod+shift+q kill
+	$mod+shift+c reload
+	$mod+shift+b border toggle
+
+	# Execs
+	$mod+l exec killall -SIGUSR1 swayidle
+	$mod+Return exec $term
+	$mod+d exec $launcher
+	$mod+shift+w exec grimshot save win ~/dl/screenshot.png
+	$mod+shift+o exec grimshot save output ~/dl/screenshot.png
+	$mod+shift+s exec grimshot save screen ~/dl/screenshot.png
+	$mod+shift+a exec grimshot save area ~/dl/screenshot.png
+	$mod+shift+v exec pbexec mpv
+	$mod+shift+e exec swaynag \
+		-t warning \
+		-m 'What do you want to do?' \
+		-b 'Exit sway' 'swaymsg exit' \
+		-b 'Lock session' 'killall -USR1 swayidle' \
+		-b 'Poweroff' 'systemctl poweroff' \
+		-b 'Reboot' 'systemctl reboot' \
+		-b 'Suspend' 'systemctl suspend' \
+		-b 'Hibernate' 'systemctl hibernate'
+
+	# Media keys
+	XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +1%
+	shift+XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +10%
+	XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -1%
+	shift+XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -10%
+	XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+	XF86MonBrightnessDown exec brightnessctl set 1%-
+	shift+XF86MonBrightnessDown exec brightnessctl set 10%-
+	XF86MonBrightnessUp exec brightnessctl set +1%
+	shift+XF86MonBrightnessUp exec brightnessctl set +10%
+
+	# Focus move
+	$mod+Left focus left
+	$mod+Down focus down
+	$mod+Up focus up
+	$mod+Right focus right
+
+	# Window move
+	$mod+shift+Left move left
+	$mod+shift+Down move down
+	$mod+shift+Up move up
+	$mod+shift+Right move right
+
+	# Workspace move
+	$mod+alt+Left move workspace to output left
+	$mod+alt+Down move workspace to output down
+	$mod+alt+Up move workspace to output up
+	$mod+alt+Right move workspace to output right
+
+	# Resize
+	$mod+ctrl+Left resize shrink width 10px
+	$mod+ctrl+Right resize grow width 10px
+	$mod+ctrl+Up resize shrink height 10px
+	$mod+ctrl+Down resize grow height 10px
+
+	# Go to next output-specific workspace
+	$mod+tab workspace next_on_output
+	$mod+shift+tab workspace prev_on_output
+
+	# Go to workspace
+	$mod+1 workspace 1
+	$mod+2 workspace 2
+	$mod+3 workspace 3
+	$mod+4 workspace 4
+	$mod+5 workspace 5
+	$mod+6 workspace 6
+	$mod+7 workspace 7
+	$mod+8 workspace 8
+	$mod+9 workspace 9
+	$mod+0 workspace 0
+
+	# Switch to workspace
+	$mod+shift+1 move container to workspace 1
+	$mod+shift+2 move container to workspace 2
+	$mod+shift+3 move container to workspace 3
+	$mod+shift+4 move container to workspace 4
+	$mod+shift+5 move container to workspace 5
+	$mod+shift+6 move container to workspace 6
+	$mod+shift+7 move container to workspace 7
+	$mod+shift+8 move container to workspace 8
+	$mod+shift+9 move container to workspace 9
+	$mod+shift+0 move container to workspace 0
+
+	# Set split mode
+	$mod+b splith
+	$mod+v splitv
+
+	# Change container layout
+	$mod+s layout stacking
+	$mod+w layout tabbed
+	$mod+e layout toggle split
+
+	$mod+f fullscreen
+	$mod+shift+f inhibit_fullscreen toggle
+	$mod+shift+space floating toggle
+	$mod+space focus mode_toggle
+	$mod+a focus parent
+
+	# Scratchpad
+	$mod+shift+minus move scratchpad
+	$mod+minus scratchpad show
+
+	$mod+shift+p mode passthrough
+}
+
+mode passthrough {
+	bindsym $mod+shift+p mode default
+}

@@ -1,0 +1,2 @@
+timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
+timeout 900 'swaylock -e -F -f -i ~/.config/sway/lockscreen.jpg'

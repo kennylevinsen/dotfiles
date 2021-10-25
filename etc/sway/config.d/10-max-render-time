@@ -1,0 +1,5 @@
+output {
+    * {
+        max_render_time off
+    }
+}

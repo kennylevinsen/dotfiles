@@ -1,0 +1,21 @@
+input {
+        type:touchpad {
+                click_method clickfinger
+                dwt enabled
+                events enabled
+                tap enabled
+                scroll_method two_finger
+                natural_scroll enabled
+        }
+
+        type:keyboard {
+                xkb_options compose:caps
+                repeat_delay 250
+                repeat_rate 40
+        }
+}
+
+seat * {
+        hide_cursor 2000
+        keyboard_grouping smart
+}
